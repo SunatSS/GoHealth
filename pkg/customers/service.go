@@ -62,9 +62,10 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 }
 
 // TokenForCustomer method generates token for customer
-func (s *Service) TokenForCustomer(ctx context.Context, item *types.TokenInfo) (token *types.Token, err error) {
+func (s *Service) TokenForCustomer(ctx context.Context, item *types.TokenInfo) (*types.Token, error) {
 	var hash string
-	err = s.pool.QueryRow(ctx, `SELECT id, password FROM customers WHERE phone = $1`, item.Login).Scan(&token.CustomerID, &hash)
+	token := &types.Token{}
+	err := s.pool.QueryRow(ctx, `SELECT id, password FROM customers WHERE phone = $1`, item.Login).Scan(&token.CustomerID, &hash)
 	if err == pgx.ErrNoRows {
 		return nil, ErrNotFound
 	}
