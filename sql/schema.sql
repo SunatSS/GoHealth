@@ -39,6 +39,7 @@ CREATE TABLE pharmacies
 );
 
 -- table of medicines
+-- todo components system
 -- todo add image
 CREATE TABLE medicines 
 (
@@ -46,13 +47,13 @@ CREATE TABLE medicines
     name            TEXT        NOT NULL,
     manafacturer    TEXT        NOT NULL,
     description     TEXT        NOT NULL,
-    compounds       TEXT[],
     pharm_id        BIGINT      NOT NULL REFERENCES pharmacies,
     price           INTEGER     NOT NULL CHECK ( price > 0 ),
     qty             INTEGER     NOT NULL DEFAULT 0,
     recipe_needed   BOOLEAN     NOT NULL DEFAULT FALSE,
     active          BOOLEAN     NOT NULL DEFAULT TRUE,
     created         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    -- components      TEXT[],
 );
 
 --todo table of drivers
@@ -62,3 +63,9 @@ CREATE TABLE medicines
 --     id          BIGSERIAL   PRIMARY KEY,
 -- );
 
+--todo table of admins
+-- --table of admins
+-- CREATE TABLE admins
+-- (
+--     id          BIGSERIAL   PRIMARY KEY,
+-- );

@@ -109,3 +109,35 @@ func (s *Service) AuthenticateCustomer(ctx context.Context, token *types.Token) 
 
 	return token.CustomerID, nil
 }
+
+func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
+	var id int64
+
+	err := s.pool.QueryRow(ctx, `SELECT customer_id FROM customers_tokens WHERE token = $1`, token).Scan(&id)
+	if err == pgx.ErrNoRows {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, ErrInternal
+	}
+	
+	return id, nil
+}
+
+//EditCustomer method edits customer
+func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (*types.Customer, error) {
+	customer := &types.Customer{}
+	err := s.pool.QueryRow(ctx, `
+		UPDATE customers SET name = $1, password = $3, address = $4, active = $5 WHERE id = $6
+		RETURNING id, name, phone, password, address, active, created
+	`, item.Name, item.Password, item.Address, item.Active, item.ID).Scan(
+		&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
+		&customer.Address, &customer.Active, &customer.Created)
+	if err == pgx.ErrNoRows {
+		return nil, ErrNotFound
+	} else if err != nil {
+		return nil, ErrInternal
+	}
+
+	return customer, nil
+}
