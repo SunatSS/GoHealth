@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"net/http"
 	"context"
 	"errors"
+	"net/http"
 )
 
 var ErrNoAuthentication = errors.New("no authentication")
@@ -18,22 +18,22 @@ func (c *contextKey) String() string {
 	return c.name
 }
 
-type IDFunc func (ctx context.Context, token string) (int64, error)
+type IDFunc func(ctx context.Context, token string) (int64, error)
 
 func Authenticate(idFunc IDFunc) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("Authorization")
-			
-			id, err := idFunc(r.Context(), token)
-			if err != nil {
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
+			if token != "" {
+				id, err := idFunc(r.Context(), token)
+				if err != nil {
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
+
+				ctx := context.WithValue(r.Context(), authenticationContextKey, id)
+				r = r.WithContext(ctx)
 			}
-
-			ctx := context.WithValue(r.Context(), authenticationContextKey, id)
-			r = r.WithContext(ctx)
-
 			handler.ServeHTTP(w, r)
 		})
 	}

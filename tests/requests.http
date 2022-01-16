@@ -1,4 +1,16 @@
-### New requests
+### Medicines
+GET http://localhost:9999/api/medicines/id/1/5
+
+###
+GET http://localhost:9999/api/medicines/name/med1/5
+
+###
+GET http://localhost:9999/api/medicines/manafacturer/man2/5
+
+###
+GET http://localhost:9999/api/medicines/pharmacy_name/pharm3/5
+
+### Customers
 POST http://localhost:9999/api/customers
 Content-Type: application/json
 

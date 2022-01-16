@@ -34,3 +34,23 @@ type Token struct {
 	Expires    time.Time `json:"expires"`
 	Created    time.Time `json:"created"`
 }
+
+type Response struct {
+	Status     string `json:"status"`
+	Reason     string `json:"reason,omitempty"`
+	CustomerId int64  `json:"customerId,omitempty"`
+}
+
+type Medicine struct {
+	ID            int64     `json:"id"`
+	Name          string    `json:"name"`
+	Manafacturer  string    `json:"manafacturer"`
+	Description   string    `json:"description"`
+	Components    []string  `json:"components"`
+	Recipe_needed bool      `json:"recipe_needed"`
+	Price         int       `json:"price"`
+	Qty           int       `json:"qty"`
+	PharmacyName  string    `json:"pharmacy_name"`
+	Active        bool      `json:"active"`
+	Created       time.Time `json:"created"`
+}

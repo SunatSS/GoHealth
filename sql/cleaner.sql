@@ -1,4 +1,3 @@
-DROP TABLE IF EXIST customers;
-DROP TABLE IF EXIST customers_tokens;
-DROP TABLE IF EXIST pharmacies;
-DROP TABLE IF EXIST medicines;
+DROP TABLE customers;
+DROP TABLE customers_tokens;
+DROP TABLE medicines;

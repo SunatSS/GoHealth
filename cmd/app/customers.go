@@ -10,12 +10,6 @@ import (
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
 )
 
-type Response struct {
-	Status     string `json:"status"`
-	Reason     string `json:"reason,omitempty"`
-	CustomerId int64  `json:"customerId,omitempty"`
-}
-
 //handleRegisterCustomer
 func (s *Server) handleRegisterCustomer(w http.ResponseWriter, r *http.Request) {
 	var item *types.RegInfo
@@ -45,7 +39,7 @@ func (s *Server) handleTokenForCustomer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := s.customersSvc.TokenForCustomer(r.Context(), item)
+	token, err := s.customersSvc.Token(r.Context(), item)
 	if err == customers.ErrNotFound {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
@@ -62,7 +56,7 @@ func (s *Server) handleTokenForCustomer(w http.ResponseWriter, r *http.Request) 
 
 //handleValidateToken
 func (s *Server) handleValidateToken(w http.ResponseWriter, r *http.Request) {
-	res := &Response{}
+	res := &types.Response{}
 
 	var item *types.Token
 	err := json.NewDecoder(r.Body).Decode(&item)
@@ -90,4 +84,22 @@ func (s *Server) handleValidateToken(w http.ResponseWriter, r *http.Request) {
 	res.Status = "ok"
 	res.CustomerId = id
 	jsoner(w, &res, http.StatusOK)
+}
+
+func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
+	var item *types.Customer
+	err := json.NewDecoder(r.Body).Decode(&item)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	customer, err := s.customersSvc.EditCustomer(r.Context(), item)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	jsoner(w, customer, http.StatusOK)
 }

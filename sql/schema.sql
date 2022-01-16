@@ -1,5 +1,4 @@
 -- table of customers
--- todo payment_sources system
 CREATE TABLE customers 
 (
     id       BIGSERIAL   PRIMARY KEY,
@@ -7,9 +6,9 @@ CREATE TABLE customers
     phone    TEXT        NOT NULL UNIQUE,
     password TEXT        NOT NULL,
     address  TEXT,
+    roles    TEXT[]      NOT NULL DEFAULT '{}'
     active   BOOLEAN     NOT NULL DEFAULT TRUE,
     created  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
-    -- payment_sources TEXT[][]
 );
 
 --table of customers_tokens
@@ -21,51 +20,18 @@ CREATE TABLE customers_tokens
     created     TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP
 );
 
--- table of pharmacies
--- todo license system and chande default of active to false
--- todo working_hours system
-CREATE TABLE pharmacies 
-(
-    id          BIGSERIAL   PRIMARY KEY,
-    name        TEXT        NOT NULL,
-    address     TEXT,
-    admin_login TEXT        NOT NULL UNIQUE,
-    password    TEXT        NOT NULL,
-    contacts    TEXT[],
-    active      BOOLEAN     NOT NULL DEFAULT true,
-    created     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
-    -- license     TEXT        NOT NULL UNIQUE,
-    -- working_hours TIMESTAMP[]
-);
-
 -- table of medicines
--- todo components system
--- todo add image
 CREATE TABLE medicines 
 (
     id              BIGSERIAL   PRIMARY KEY,
     name            TEXT        NOT NULL,
     manafacturer    TEXT        NOT NULL,
     description     TEXT        NOT NULL,
-    pharm_id        BIGINT      NOT NULL REFERENCES pharmacies,
+    components      TEXT[],
+    recipe_needed   BOOLEAN     NOT NULL DEFAULT FALSE,
     price           INTEGER     NOT NULL CHECK ( price > 0 ),
     qty             INTEGER     NOT NULL DEFAULT 0,
-    recipe_needed   BOOLEAN     NOT NULL DEFAULT FALSE,
+    pharmacy_name   TEXT        NOT NULL,
     active          BOOLEAN     NOT NULL DEFAULT TRUE,
     created         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
-    -- components      TEXT[],
 );
-
---todo table of drivers
--- --table of drivers
--- CREATE TABLE drivers 
--- (
---     id          BIGSERIAL   PRIMARY KEY,
--- );
-
---todo table of admins
--- --table of admins
--- CREATE TABLE admins
--- (
---     id          BIGSERIAL   PRIMARY KEY,
--- );

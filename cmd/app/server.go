@@ -7,6 +7,7 @@ import (
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
 	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
+	"github.com/SYSTEMTerror/GoHealth/pkg/medicines"
 	"github.com/gorilla/mux"
 )
 
@@ -14,11 +15,12 @@ import (
 type Server struct {
 	mux          *mux.Router
 	customersSvc *customers.Service
+	medicinesSvc *medicines.Service
 }
 
 //NewServer creates new server with mux from net/http
-func NewServer(mux *mux.Router, customersSvc *customers.Service) *Server {
-	return &Server{mux: mux, customersSvc: customersSvc}
+func NewServer(mux *mux.Router, customersSvc *customers.Service, medicinesSvc *medicines.Service) *Server {
+	return &Server{mux: mux, customersSvc: customersSvc, medicinesSvc: medicinesSvc}
 }
 
 // ServeHTTP
@@ -34,10 +36,17 @@ func (s *Server) Init() {
 
 	customersSubrouter := s.mux.PathPrefix("/api/customers").Subrouter()
 	customersSubrouter.Use(customersAuthenticateMd)
+	customersSubrouter.Use(middleware.CheckRole(s.customersSvc.HasAnyRole, "CUSTOMER", "ADMIN"))
 
 	customersSubrouter.HandleFunc("", s.handleRegisterCustomer).Methods("POST")
+	customersSubrouter.HandleFunc("/edit", s.handleEditCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/token", s.handleTokenForCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/token/validate", s.handleValidateToken).Methods("POST")
+
+	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
+
+	medicinesSubrouter.HandleFunc("", s.handleSaveMedicine).Methods("POST")
+	medicinesSubrouter.HandleFunc("/{column:(?:id|name|manafacturer|pharmacy_name)}/{value}/{limit}", s.handleGetMedicines).Methods("GET")
 }
 
 //function jsoner marshal interface to json and write to response writer

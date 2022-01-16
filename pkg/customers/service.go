@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
@@ -47,8 +48,7 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 	item.Password = string(hash)
 	err = s.pool.QueryRow(ctx, `
 			INSERT INTO customers (name, phone, password, address) VALUES ($1, $2, $3, $4)
-			ON CONFLICT (phone) DO UPDATE SET 
-				name = excluded.name, password = excluded.password, address = excluded.address
+			ON CONFLICT (phone) DO NOTHING
 			RETURNING id, name, phone, password, address, active, created
 		`, item.Name, item.Phone, item.Password, item.Address).Scan(
 			&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
@@ -61,8 +61,8 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 	return customer, nil
 }
 
-// TokenForCustomer method generates token for customer
-func (s *Service) TokenForCustomer(ctx context.Context, item *types.TokenInfo) (*types.Token, error) {
+// Token method generates token for customer
+func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Token, error) {
 	var hash string
 	token := &types.Token{}
 	err := s.pool.QueryRow(ctx, `SELECT id, password FROM customers WHERE phone = $1`, item.Login).Scan(&token.CustomerID, &hash)
@@ -140,4 +140,23 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (*type
 	}
 
 	return customer, nil
+}
+
+func (s *Service) HasAnyRole(ctx context.Context, id int64, inRoles ...string) bool {
+	var dbRoles []string
+	err := s.pool.QueryRow(ctx, `
+		SELECT roles FROM customers WHERE id = $1
+	`, id).Scan(&dbRoles)
+	if err != nil {
+		log.Println("customers HasAnyRole s.pool.QueryRow ERROR:", err)
+		return false
+	}
+	for _, inRole := range inRoles {
+		for _, dbRole := range dbRoles {
+			if dbRole == strings.ToUpper(inRole) {
+				return true
+			}
+		}
+	}
+	return false
 }

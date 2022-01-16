@@ -10,6 +10,7 @@ import (
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app"
 	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
+	"github.com/SYSTEMTerror/GoHealth/pkg/medicines"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/dig"
@@ -35,6 +36,7 @@ func execute(host string, port string, dsn string) (err error) {
 			return pgxpool.Connect(ctx, dsn)
 		},
 		customers.NewService,
+		medicines.NewService,
 		func(server *app.Server) *http.Server {
 			return &http.Server{
 				Addr:    net.JoinHostPort(host, port),
