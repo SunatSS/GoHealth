@@ -67,7 +67,7 @@ func (s *Service) GetSomeMedicines(ctx context.Context, column string, value str
 func (s *Service) Save(ctx context.Context, item *types.Medicine) (*types.Medicine, error) {
 	if item.ID == 0 {
 		err := s.pool.QueryRow(ctx, `
-			INSERT INTO medecines (name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name)
+			INSERT INTO medicines (name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id
 		`, item.Name, item.Manafacturer, item.Description, item.Components, item.Recipe_needed, item.Price, item.Qty, item.PharmacyName).Scan(&item.ID)
 		if err != nil {
@@ -77,7 +77,7 @@ func (s *Service) Save(ctx context.Context, item *types.Medicine) (*types.Medici
 		return item, nil
 	} else {
 		_, err := s.pool.Exec(ctx, `
-			UPDATE medecines SET name = $1, manafacturer = $2, description = $3, components = $4, recipe_needed = $5, price = $6, qty = $7, pharmacy_name = $8 WHERE id = $9
+			UPDATE medicines SET name = $1, manafacturer = $2, description = $3, components = $4, recipe_needed = $5, price = $6, qty = $7, pharmacy_name = $8 WHERE id = $9
 		`, item.Name, item.Manafacturer, item.Description, item.Components, item.Recipe_needed, item.Price, item.Qty, item.PharmacyName, item.ID)
 		if err != nil {
 			log.Println("Medicines s.pool.Exec ERROR:", err)

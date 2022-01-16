@@ -1,26 +1,54 @@
 ### Medicines
 GET http://localhost:9999/api/medicines/id/1/5
-
 ###
+
 GET http://localhost:9999/api/medicines/name/med1/5
-
 ###
+
 GET http://localhost:9999/api/medicines/manafacturer/man2/5
-
 ###
+
 GET http://localhost:9999/api/medicines/pharmacy_name/pharm3/5
+###
+
+POST http://localhost:9999/api/medicines
+Content-Type: application/json
+
+{
+    "id": 4,
+    "name": "med1",
+    "manafacturer": "man1",
+    "description": "desc1",
+    "components": ["comp1", "comp2"],
+    "recipe_needed": true,
+    "price": 10,
+    "qty": 10,
+    "pharmacy_name": "pharm1"
+}
+###
 
 ### Customers
 POST http://localhost:9999/api/customers
 Content-Type: application/json
 
 {
-    "name": "Customer1",
-    "phone": "11111111111",
-    "password": "123456"
+    "name": "Customer9",
+    "phone": "999",
+    "password": "123456",
+    "address": "Address1"
 }
-
 ###
+
+POST http://localhost:9999/api/customers/edit
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name": "Customer1",
+    "address": "Address22"
+}
+###
+
 POST http://localhost:9999/api/customers/token
 Content-Type: application/json
 
@@ -28,42 +56,12 @@ Content-Type: application/json
     "login": "11111111111",
     "password": "123456"
 }
-
 ###
+
 POST http://localhost:9999/api/customers/token/validate
 Content-Type: application/json
 
 {
-    "token": "1ffc678623a6101b1a51bcaf33c6b9237827f2e459bc0a30373910931508d7db48aae3dbb9a2ee178e8fee46a6ebe9a2410491673f6c619aafe0bdb1f35d06a1886e96b3d9f83ad9eb2c738d14a01511da9724f4f5c56e26453b19912dc363dfcc667dbe97a9719027c269d7c1e1a3455acc2f6af8c3733a5232c1a1cb06bade020e20812ba069b2a88025d915db91fa93e6badbaa572b7b1c5f9ed5cad62f9b8b9d94c4ab02c01f97bcfd915155acbf3807db659b88584c178e5f5ae21d3d11bf189ea9db240066bf97e14146226572fa67edcfa5cc4423c25e416b7aa911a4bbe97ae6fd60d550700cf32de0e1e74e2141f1375f746085448135abbbd5e2e6"
+    "token": "4a32a0e5329fa7fdbba4154bcd1263e75c5a350b5e44627764090fe3809bfa796c3e41aa7fb9efd5f3cfc38c34c6bf565fa60e3e9ef5c64679642446dda57a100d36f1921126acfdb595dcc4312da2406d1207056db8fdb8114f9201020d12dc6d5e23e25b04579942b298c1d483607a1636c94f478a11f2f9ac1b51af938fc8a3017e60d8768a0b6b37423e22a4eb5426ff8c5931768fa8477d6365669bb64a7f709a1701a78c394fa0f085ac980b918151b47b4df93482ec07f25f42447da83cad398f343675407d2731e2db08323670fe32383517fda2766db89b33cefdcc63d43c3a312e25d90ec3637922ba2a1b40b62775cbab4bf6abb5a6406cb06b0d"
 }
-
-
-
-
-### Old requests
-GET http://localhost:9999/customers
-
 ###
-POST http://localhost:9999/customers
-Content-Type: application/json
-
-{
-    "id": 0,
-    "name": "Customer 3",
-    "phone": "3"
-}
-
-###
-GET http://localhost:9999/customers/3
-
-###
-DELETE http://localhost:9999/customers/4
-
-###
-GET http://localhost:9999/customers/active
-
-###
-POST http://localhost:9999/customers/1/block
-
-###
-DELETE http://localhost:9999/customers/1/block

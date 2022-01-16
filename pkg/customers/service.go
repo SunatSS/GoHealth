@@ -128,9 +128,9 @@ func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (*types.Customer, error) {
 	customer := &types.Customer{}
 	err := s.pool.QueryRow(ctx, `
-		UPDATE customers SET name = $1, password = $3, address = $4, active = $5 WHERE id = $6
+		UPDATE customers SET name = $1, address = $2 WHERE id = $3
 		RETURNING id, name, phone, password, address, active, created
-	`, item.Name, item.Password, item.Address, item.Active, item.ID).Scan(
+	`, item.Name, item.Address, item.ID).Scan(
 		&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
 		&customer.Address, &customer.Active, &customer.Created)
 	if err == pgx.ErrNoRows {
