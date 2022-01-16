@@ -1,12 +1,15 @@
--  Ask advice about role system and etc.
-        New funcs idea
+-   Ask advice about role system and etc.
         Role system structure and its update or mistakes
-        Does use.authentificate means that all request will be maden by authentificate
-        Edit customer securuty
+        Does use.authentificate means that all request will be maden by authentificate?
+        EditCustomer securuty
         We need authentificate header with token in request?
-        Medicine authentificate
--  Make someting with file creating and using
--  Make test data -> Make test scripts (also role system)
--  Change name of commit -> rename first init@ to first commit
--  Delete branches
--  Make basket system and pay + send funcs logging "We kinda got money" and "We kinda send car"
+        Medicine authentificate checking
+-   Give role method
+-   Make someting with file creating and using
+        Backup or image save
+            How store image in db
+-   Ask for New funcs idea
+-   Make test data -> Make test scripts (also role system)
+-   Change name of commit -> rename first init@ to first commit
+-   Delete useless branches
+-   Make basket system and pay + send funcs logging "We kinda got money" and "We kinda send car"
