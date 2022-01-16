@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 
@@ -52,38 +51,6 @@ func (s *Server) handleTokenForCustomer(w http.ResponseWriter, r *http.Request) 
 	}
 
 	jsoner(w, token, http.StatusOK)
-}
-
-//handleValidateToken
-func (s *Server) handleValidateToken(w http.ResponseWriter, r *http.Request) {
-	res := &types.Response{}
-
-	var item *types.Token
-	err := json.NewDecoder(r.Body).Decode(&item)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
-	id, err := s.customersSvc.AuthenticateCustomer(r.Context(), item)
-	if errors.Is(err, customers.ErrNotFound) || errors.Is(err, customers.ErrInternal) {
-		res.Status = "fail"
-		res.Reason = "not found"
-		
-		jsoner(w, &res, http.StatusNotFound)
-		return
-	}
-	if errors.Is(err, customers.ErrExpired) {
-		res.Status = "fail"
-		res.Reason = "expired"
-		jsoner(w, &res, http.StatusBadRequest)
-		return
-	}
-
-	res.Status = "ok"
-	res.CustomerId = id
-	jsoner(w, &res, http.StatusOK)
 }
 
 func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {

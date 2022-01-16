@@ -33,16 +33,16 @@ func (s *Server) Init() {
 	s.mux.Use(middleware.Logger)
 
 	customersAuthenticateMd := middleware.Authenticate(s.customersSvc.IDByToken)
+	customersCheckRoleMd := middleware.CheckRole(s.customersSvc.HasAnyRole, "CUSTOMER", "ADMIN")
 
 	customersSubrouter := s.mux.PathPrefix("/api/customers").Subrouter()
 	customersSubrouter.Use(customersAuthenticateMd)
-	customersSubrouter.Use(middleware.CheckRole(s.customersSvc.HasAnyRole, "CUSTOMER", "ADMIN"))
+	customersSubrouter.Use(customersCheckRoleMd)
 
 	customersSubrouter.HandleFunc("", s.handleRegisterCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/edit", s.handleEditCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/token", s.handleTokenForCustomer).Methods("POST")
-	customersSubrouter.HandleFunc("/token/validate", s.handleValidateToken).Methods("POST")
-
+	
 	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
 
 	medicinesSubrouter.HandleFunc("", s.handleSaveMedicine).Methods("POST")

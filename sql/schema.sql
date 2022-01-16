@@ -6,7 +6,7 @@ CREATE TABLE customers
     phone    TEXT        NOT NULL UNIQUE,
     password TEXT        NOT NULL,
     address  TEXT,
-    roles    TEXT[]      NOT NULL DEFAULT '{}'
+    roles    TEXT[]      NOT NULL DEFAULT '{}',
     active   BOOLEAN     NOT NULL DEFAULT TRUE,
     created  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
