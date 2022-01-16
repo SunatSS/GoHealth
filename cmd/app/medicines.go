@@ -22,12 +22,15 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 
 	id, err := middleware.Authentication(r.Context())
 	if err != nil {
-		log.Println("app.medicines Save middleware.Authentication ERROR:", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), id)
+	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	if id != 0 && !s.customersSvc.HasAnyRole(r.Context(), id, "ADMIN") {
-		log.Println("app.managers handleManagerRegistration middleware.Authentication ERROR:", err)
+	if !isAdmin {
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}

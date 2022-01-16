@@ -5,8 +5,8 @@ INSERT INTO customers (name, phone, password, address) VALUES
     ('Kirya', '4', '12345678', '123 Main St')
 ON CONFLICT (phone) DO NOTHING
 RETURNING id, name, phone, password, address, active, created;
-INSERT INTO customers (name, phone, password, address, roles) VALUES 
-    ('mr. Fedya', '5', '12345678', '123 Main St', '{"CUSTOMER", "ADMIN"}')
+INSERT INTO customers (name, phone, password, address, is_admin) VALUES 
+    ('mr. Fedya', '5', '12345678', '123 Main St', TRUE)
 ON CONFLICT (phone) DO NOTHING
 RETURNING id, name, phone, password, address, active, created;
 SELECT id, name, phone, password, address, active, created FROM customers WHERE name = 'Fedya';

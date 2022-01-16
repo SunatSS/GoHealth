@@ -17,6 +17,7 @@ type Customer struct {
 	Phone    string    `json:"phone"`
 	Password string    `json:"password"`
 	Address  string    `json:"address"`
+	IsAdmin  bool      `json:"is_admin"`
 	Active   bool      `json:"active"`
 	Created  time.Time `json:"created"`
 }

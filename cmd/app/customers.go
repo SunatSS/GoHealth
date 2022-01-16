@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
 	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
 )
@@ -61,12 +62,44 @@ func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
+	
+	id, err := middleware.Authentication(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	item.ID = id
 
-	customer, err := s.customersSvc.EditCustomer(r.Context(), item)
+	err = s.customersSvc.EditCustomer(r.Context(), item)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	jsoner(w, customer, http.StatusOK)
+	jsoner(w, item, http.StatusOK)
+}
+
+//handleMakeAdmin makes a customer with id an admin
+func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
+	var id int64
+	err := json.NewDecoder(r.Body).Decode(&id)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	_, err = middleware.Authentication(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	
+	err = s.customersSvc.MakeAdmin(r.Context(), id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	jsoner(w, id, http.StatusOK)
 }

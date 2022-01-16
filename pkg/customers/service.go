@@ -51,8 +51,8 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 			ON CONFLICT (phone) DO NOTHING
 			RETURNING id, name, phone, password, address, active, created
 		`, item.Name, item.Phone, item.Password, item.Address).Scan(
-			&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
-			&customer.Address, &customer.Active, &customer.Created)
+		&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
+		&customer.Address, &customer.Active, &customer.Created)
 	if err != nil {
 		log.Println("Save with id == 0 s.pool.QueryRow error:", err)
 		return nil, ErrInternal
@@ -94,69 +94,74 @@ func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Toke
 	return token, nil
 }
 
-//AuthenticateCustomer method authenticates customer by token and returns customer id
-func (s *Service) AuthenticateCustomer(ctx context.Context, token *types.Token) (int64, error) {
-	err := s.pool.QueryRow(ctx, `
-		SELECT customer_id, expires, created FROM customers_tokens WHERE token = $1
-	`, token.Token).Scan(&token.CustomerID, &token.Expires, &token.Created)
-	if err == pgx.ErrNoRows {
-		return 0, ErrNotFound
-	} else if err != nil {
-		return 0, ErrInternal
-	} else if token.Expires.Before(time.Now()) {
-		return 0, ErrExpired
-	} 
-
-	return token.CustomerID, nil
-}
-
 func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 	var id int64
+	var expires time.Time
 
-	err := s.pool.QueryRow(ctx, `SELECT customer_id FROM customers_tokens WHERE token = $1`, token).Scan(&id)
+	err := s.pool.QueryRow(ctx, `SELECT customer_id, expires FROM customers_tokens WHERE token = $1`, token).Scan(&id, &expires)
 	if err == pgx.ErrNoRows {
 		return 0, nil
 	}
-	if err != nil {
+	if err != nil || expires.Before(time.Now()) {
 		return 0, ErrInternal
 	}
-	
+
 	return id, nil
 }
 
 //EditCustomer method edits customer
-func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (*types.Customer, error) {
-	customer := &types.Customer{}
-	err := s.pool.QueryRow(ctx, `
-		UPDATE customers SET name = $1, address = $2 WHERE id = $3
-		RETURNING id, name, phone, password, address, active, created
-	`, item.Name, item.Address, item.ID).Scan(
-		&customer.ID, &customer.Name, &customer.Phone, &customer.Password,
-		&customer.Address, &customer.Active, &customer.Created)
-	if err == pgx.ErrNoRows {
-		return nil, ErrNotFound
-	} else if err != nil {
-		return nil, ErrInternal
-	}
-
-	return customer, nil
-}
-
-func (s *Service) HasAnyRole(ctx context.Context, id int64, inRoles ...string) bool {
-	var dbRoles []string
-	err := s.pool.QueryRow(ctx, `
-		SELECT roles FROM customers WHERE id = $1
-	`, id).Scan(&dbRoles)
-	if err != nil {
-		log.Println("customers HasAnyRole s.pool.QueryRow ERROR:", err)
-		return false
-	}
-	for _, inRole := range inRoles {
-		for _, dbRole := range dbRoles {
-			if dbRole == strings.ToUpper(inRole) {
-				return true
-			}
+func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (error) {
+	sqlBase := "UPDATE customers SET {col} = $1 WHERE id = $2 RETURNING id"
+	if item.Name != "" {
+		sql := strings.ReplaceAll(sqlBase, "{col}", "name")
+		err := s.pool.QueryRow(ctx, sql, item.Name, item.ID).Scan(&item.ID)
+		if err == pgx.ErrNoRows {
+			return ErrNotFound
+		} else if err != nil {
+			return ErrInternal
 		}
 	}
-	return false
+	if item.Password != "" {
+		sql := strings.ReplaceAll(sqlBase, "{col}", "password")
+		err := s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
+		if err == pgx.ErrNoRows {
+			return ErrNotFound
+		} else if err != nil {
+			return ErrInternal
+		}
+	}
+	if item.Address != "" {
+		sql := strings.ReplaceAll(sqlBase, "{col}", "address")
+		err := s.pool.QueryRow(ctx, sql, item.Address, item.ID).Scan(&item.ID)
+		if err == pgx.ErrNoRows {
+			return ErrNotFound
+		} else if err != nil {
+			return ErrInternal
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, error) {
+	var isAdmin bool
+	err := s.pool.QueryRow(ctx, `SELECT is_admin FROM customers WHERE id = $1`, id).Scan(&isAdmin)
+	if err == pgx.ErrNoRows {
+		return false, ErrNotFound
+	} else if err != nil {
+		return false, ErrInternal
+	}
+
+	return isAdmin, nil
+}
+
+func (s *Service) MakeAdmin(ctx context.Context, id int64) (error) {
+	_, err := s.pool.Exec(ctx, `UPDATE customers SET is_admin = true WHERE id = $1`, id)
+	if err == pgx.ErrNoRows {
+		return ErrNotFound
+	} else if err != nil {
+		return ErrInternal
+	}
+
+	return nil
 }
