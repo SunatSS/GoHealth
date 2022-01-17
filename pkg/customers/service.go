@@ -165,3 +165,16 @@ func (s *Service) MakeAdmin(ctx context.Context, id int64) (error) {
 
 	return nil
 }
+
+func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Customer, error) {
+	customer := &types.Customer{}
+	err := s.pool.QueryRow(ctx, `SELECT id, name, phone, address, active, created FROM customers WHERE id = $1`, id).Scan(
+		&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Active, &customer.Created)
+	if err == pgx.ErrNoRows {
+		return nil, ErrNotFound
+	} else if err != nil {
+		return nil, ErrInternal
+	}
+
+	return customer, nil
+}

@@ -1,12 +1,22 @@
 -   Make someting with file creating and using
-        Backup or image save
-            How store image in db
+        Log
+        Backup
+        Store images
 -   Ask for New funcs idea
--   Make test data -> Make test scripts (also role system)
--   GetMedecine and EditCustomer sql rework
+-   Make test data -> Make test scenario
+        Success tests + scenario
+            Customers
+            Medecines
+        Fail tests + scenario
+            Customers
+            Medecines
+-   GetMedicine and EditCustomer sql rework
 -   EditCustomer refactor for less copypaste
--   Check errors codes
--   Check for exec/query/queryRow using in right place
--   Change name of commit -> rename first init@ to first commit
+-   Remake ALL Error returns in all levels
+-   Check for exec/query/queryRow using in right places
+-   Make comments
+-   Change names of commit 
+        Rename first init@ to first commit
 -   Delete useless branches
 -   Make basket system and pay + send funcs logging "We kinda got money" and "We kinda send car"
+-   Menagers system adding

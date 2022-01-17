@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
 	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
+	"github.com/gorilla/mux"
 )
 
 //handleRegisterCustomer
@@ -89,9 +91,18 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = middleware.Authentication(r.Context())
+	adminId, err := middleware.Authentication(r.Context())
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if !isAdmin {
+		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}
 	
@@ -102,4 +113,39 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsoner(w, id, http.StatusOK)
+}
+
+func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request)  {
+	adminId, err := middleware.Authentication(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if !isAdmin {
+		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		return
+	}
+
+	idParam, ok := mux.Vars(r)["id"]
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	customer, err := s.customersSvc.GetCustomerByID(r.Context(), id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	jsoner(w, customer, http.StatusOK)
 }
