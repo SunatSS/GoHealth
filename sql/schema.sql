@@ -16,7 +16,7 @@ CREATE TABLE customers_tokens
 (
     token       TEXT        NOT NULL    UNIQUE,
     customer_id BIGINT      NOT NULL    REFERENCES customers,
-    expires     TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 hour',
+    expires     TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 year',
     created     TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP
 );
 

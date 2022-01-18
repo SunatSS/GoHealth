@@ -110,7 +110,7 @@ func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 }
 
 //EditCustomer method edits customer
-func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (error) {
+func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error {
 	sqlBase := "UPDATE customers SET {col} = $1 WHERE id = $2 RETURNING id"
 	if item.Name != "" {
 		sql := strings.ReplaceAll(sqlBase, "{col}", "name")
@@ -122,8 +122,14 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (error
 		}
 	}
 	if item.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return ErrInternal
+		}
+		item.Password = string(hash)
+		
 		sql := strings.ReplaceAll(sqlBase, "{col}", "password")
-		err := s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
+		err = s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
 		if err == pgx.ErrNoRows {
 			return ErrNotFound
 		} else if err != nil {
@@ -155,8 +161,8 @@ func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, error) {
 	return isAdmin, nil
 }
 
-func (s *Service) MakeAdmin(ctx context.Context, id int64) (error) {
-	_, err := s.pool.Exec(ctx, `UPDATE customers SET is_admin = true WHERE id = $1`, id)
+func (s *Service) MakeAdmin(ctx context.Context, makeAdminInfo types.MakeAdminInfo) error {
+	_, err := s.pool.Exec(ctx, `UPDATE customers SET is_admin = $2 WHERE id = $1`, makeAdminInfo.ID, makeAdminInfo.AdminStatus)
 	if err == pgx.ErrNoRows {
 		return ErrNotFound
 	} else if err != nil {
@@ -168,8 +174,8 @@ func (s *Service) MakeAdmin(ctx context.Context, id int64) (error) {
 
 func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Customer, error) {
 	customer := &types.Customer{}
-	err := s.pool.QueryRow(ctx, `SELECT id, name, phone, address, active, created FROM customers WHERE id = $1`, id).Scan(
-		&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Active, &customer.Created)
+	err := s.pool.QueryRow(ctx, `SELECT id, name, phone, address, password, is_admin, active, created FROM customers WHERE id = $1`, id).Scan(
+		&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Password, &customer.IsAdmin, &customer.Active, &customer.Created)
 	if err == pgx.ErrNoRows {
 		return nil, ErrNotFound
 	} else if err != nil {

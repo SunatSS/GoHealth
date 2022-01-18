@@ -1,22 +1,22 @@
 -- admin (password - '12345678')
 INSERT INTO customers (name, phone, password, address, is_admin) VALUES 
-    ('mr. Fedya', '007', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St', TRUE)
+    ('mr. Fedya', '001', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St', TRUE)
 ON CONFLICT (phone) DO NOTHING
 RETURNING id, name, phone, password, address, active, created;
 
 --  customers (password - '12345678')
 INSERT INTO customers (name, phone, password, address) VALUES 
-    ('Firya', '1', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
-    ('Misha', '2', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
-    ('Vasya', '3', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
-    ('Kirya', '4', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
-    ('Danya', '5', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St')
+    ('Firya', '2', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
+    ('Misha', '3', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
+    ('Vasya', '4', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
+    ('Kirya', '5', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St'),
+    ('Danya', '6', '$2a$10$W1uTjnpz.h/hbfWuRhO04ekfs6FffeMsIbtFpxLiFhE6eMgW7oMUi', '123 Main St')
 ON CONFLICT (phone) DO NOTHING
 RETURNING id, name, phone, password, address, active, created;
 
 -- default admins token
-INSERT INTO customers_tokens (token, customer_id, expires) VALUES 
-    ('defaultAdminsToken', 1, '2023-01-21 23:59:59')
+INSERT INTO customers_tokens (token, customer_id) VALUES 
+    ('defaultAdminsToken', 1);
 
 -- medicines
 INSERT INTO medicines (name, manafacturer, description, price, pharmacy_name) VALUES

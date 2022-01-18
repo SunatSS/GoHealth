@@ -5,7 +5,6 @@
 -   Ask for New funcs idea
 -   Make test data -> Make test scenario
         Success tests + scenario
-            Customers
             Medecines
         Fail tests + scenario
             Customers
@@ -14,6 +13,7 @@
 -   EditCustomer refactor for less copypaste
 -   Remake ALL Error returns in all levels
 -   Check for exec/query/queryRow using in right places
+-   Check for * and &
 -   Make comments
 -   Change names of commit 
         Rename first init@ to first commit

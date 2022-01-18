@@ -41,6 +41,7 @@ func (s *Server) Init() {
 	customersSubrouter.HandleFunc("/edit", s.handleEditCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/token", s.handleTokenForCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/admin", s.handleMakeAdmin).Methods("POST")
+	customersSubrouter.HandleFunc("/{id}", s.handleGetCustomerByID).Methods("GET")
 	
 	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
 

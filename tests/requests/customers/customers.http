@@ -1,0 +1,44 @@
+POST http://localhost:9999/api/customers
+Content-Type: application/json
+
+{
+    "name": "Kolya",
+    "phone": "7",
+    "password": "12345678",
+    "address": "123 Main St"
+}
+###
+
+POST http://localhost:9999/api/customers/token
+Content-Type: application/json
+
+{
+    "login": "7",
+    "password": "12345678"
+}
+###
+
+POST http://localhost:9999/api/customers/edit
+Authorization: 97e2f67fa91d0b60a54f2c370b48e0637de5e4a3156371d4eeaabcda976f06b70cb5f7bfa1dafb95a7579f1f66ed4eee3bf33c184f08ceade9d68e658eab3e4201ee6a84a276def2da3f1fbb9ca4a83d97f3240a656fef222b56997b20199152b68e27b50044a8637c9dbd0005de24937cacf0009df568586ce897cee5985ee405db0be2fab8e860c96b4edc84c259f96255280a3de6298f4368b41c8aeaa0b8c8ffb28192d5022e8f3a4f68ecf65a003b12688454d946a12f0a77806d3ea664e1a3a6c1aa4fe5c21755247e00fdb8a26df79176227ca60b7d98239efcde063d9724e4c27f7119b4852fe9dfeb58eae9b7783ec1d05c8d566725dfe8ec067c53
+Content-Type: application/json
+
+{
+    "name": "K01ya",
+    "password": "12345678",
+    "address": "Home"
+}
+###
+
+POST http://localhost:9999/api/customers/admin
+Authorization: defaultAdminsToken
+Content-Type: application/json
+
+{
+    "id": 7,
+    "adminStatus": true
+}
+###
+
+GET  http://localhost:9999/api/customers/7
+Authorization: defaultAdminsToken
+###

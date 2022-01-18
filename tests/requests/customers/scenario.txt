@@ -1,0 +1,29 @@
++Register customer:
+        Path    ".../api/customers"
+        Method  POST
+        Token   Not required
+        Enter   (Name, Phone, Password-unhashed, Address) - types.RegInfo
+        Return  (StatusOK, types.Customer)
++Token for customer:
+        Path    ".../api/customers/token"
+        Method  POST
+        Token   Not required
+        Enter   (Login-phone, Password-unhashed) - types.RegInfo
+        Return  (StatusOK, types.Token)
++Edit customer:
+        Path    ".../api/customers/edit"
+        Method  POST
+        Token   Required(users)
+        Enter   (Name, Password-unhashed, Address) - types.Customer
+        Return  (StatusOK, types.Customer-not edited feilds will be equal to type default value)
++MakeAdmin:
+        Path    ".../api/customers/admin"
+        Method  POST
+        Token   Required(already existing admin)
+        Enter   (ID-user that will became admin, adminStatus-change users admin status into true/false)-types.MakeAdminInfo
+        Return  (StatusOK, types.MakeAdminInfo)
++GetById:
+        Path    ".../api/customers/{id}"
+        Method  GET
+        Token   Required(admins)
+        Return  (StatusOK, types.Customer)

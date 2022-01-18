@@ -83,14 +83,6 @@ func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
 
 //handleMakeAdmin makes a customer with id an admin
 func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
-	var id int64
-	err := json.NewDecoder(r.Body).Decode(&id)
-	if err != nil {
-		log.Print(err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
 	adminId, err := middleware.Authentication(r.Context())
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -105,14 +97,22 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}
+
+	var makeAdminInfo types.MakeAdminInfo
+	err = json.NewDecoder(r.Body).Decode(&makeAdminInfo)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
 	
-	err = s.customersSvc.MakeAdmin(r.Context(), id)
+	err = s.customersSvc.MakeAdmin(r.Context(), makeAdminInfo)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	jsoner(w, id, http.StatusOK)
+	jsoner(w, makeAdminInfo, http.StatusOK)
 }
 
 func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request)  {

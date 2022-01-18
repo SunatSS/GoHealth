@@ -36,10 +36,9 @@ type Token struct {
 	Created    time.Time `json:"created"`
 }
 
-type Response struct {
-	Status     string `json:"status"`
-	Reason     string `json:"reason,omitempty"`
-	CustomerId int64  `json:"customerId,omitempty"`
+type MakeAdminInfo struct {
+	ID int64 `json:"id"`
+	AdminStatus bool `json:"adminStatus"`
 }
 
 type Medicine struct {
