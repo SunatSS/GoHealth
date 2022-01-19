@@ -36,7 +36,7 @@ func (s *Service) GetSomeMedicines(ctx context.Context, column string, value str
 		sql = fmt.Sprintf("SELECT id, name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name, active, created FROM medicines WHERE %v = '%v' AND active = true ORDER BY id LIMIT %v", column, value, limit)
 	}
 	rows, err := s.pool.Query(ctx, sql)
-	if errors.Is(err, pgx.ErrNoRows) {
+	if err == pgx.ErrNoRows {
 		log.Println("Medicines s.pool.Query No rows:", err)
 		return nil, ErrNotFound
 	}

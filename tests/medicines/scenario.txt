@@ -1,0 +1,32 @@
++SaveMedicine
+        Path    ".../api/medicines"
+        Method  POST
+        Token   Required(admin)
+        Enter   (ID-0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name) - types.Medicine
+        Return  (StatusOK, types.Medicine)
++EditMedicine
+        Path    ".../api/medicines"
+        Method  POST
+        Token   Required(admin)
+        Enter   (ID-non0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name) - types.Medicine
+        Return  (StatusOK, types.Medicine)
++GetMedicineByID
+        Path    ".../api/medicines/id/1/5"
+        Method  GET
+        Token   Not required
+        Return  (StatusOK, types.Medicine)
++GetMedicineByName
+        Path    ".../api/medicines/name/med1/5"
+        Method  GET
+        Token   Not required
+        Return  (StatusOK, types.Medicine[])
++GetMedicineByManaf
+        Path    ".../api/medicines/manafacturer/man2/5"
+        Method  GET
+        Token   Not required
+        Return  (StatusOK, types.Medicine[])
++GetMediceneByPharm
+        Path    ".../api/medicines/pharmacy_name/pharm3/5"
+        Method  GET
+        Token   Not required
+        Return  (StatusOK, types.Medicine)

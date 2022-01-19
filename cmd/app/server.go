@@ -44,6 +44,7 @@ func (s *Server) Init() {
 	customersSubrouter.HandleFunc("/{id}", s.handleGetCustomerByID).Methods("GET")
 	
 	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
+	medicinesSubrouter.Use(customersAuthenticateMd)
 
 	medicinesSubrouter.HandleFunc("", s.handleSaveMedicine).Methods("POST")
 	medicinesSubrouter.HandleFunc("/{column:(?:id|name|manafacturer|pharmacy_name)}/{value}/{limit}", s.handleGetMedicines).Methods("GET")
@@ -53,7 +54,7 @@ func (s *Server) Init() {
 func jsoner(w http.ResponseWriter, v interface{}, code int) error {
 	data, err := json.Marshal(v)
 	if err != nil {
-		log.Print(err)
+		log.Println("jsoner json.Marshal error:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return err
 	}
@@ -62,7 +63,7 @@ func jsoner(w http.ResponseWriter, v interface{}, code int) error {
 	w.WriteHeader(code)
 	_, err = w.Write(data)
 	if err != nil {
-		log.Print(err)
+		log.Println("jsoner w.Write error:", err)
 		return err
 	}
 	return nil

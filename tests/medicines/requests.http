@@ -1,0 +1,51 @@
+### Save medicine
+POST http://localhost:9999/api/medicines
+Authorization: defaultAdminsToken
+Content-Type: application/json
+
+{
+    "id": 0,
+    "name": "med10",
+    "manafacturer": "man10",
+    "description": "desc10",
+    "components": ["comp1", "comp2"],
+    "recipe_needed": true,
+    "price": 10,
+    "qty": 10,
+    "pharmacy_name": "pharm10"
+}
+###
+
+### Edit medicine
+POST http://localhost:9999/api/medicines
+Authorization: defaultAdminsToken
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name": "med5",
+    "manafacturer": "man5",
+    "description": "desc5",
+    "components": ["comp1", "comp2"],
+    "recipe_needed": true,
+    "price": 10,
+    "qty": 10,
+    "pharmacy_name": "pharm5"
+}
+###
+
+### Get medicine by id
+GET http://localhost:9999/api/medicines/id/1/1
+###
+
+### Get 5 medicines by name (for changing amount change last parameter) 
+GET http://localhost:9999/api/medicines/name/med1/5
+###
+
+### Get 5 medicines by manafacturer (for changing amount change last parameter)
+GET http://localhost:9999/api/medicines/manafacturer/man2/5
+###
+
+### Get 5 medicines by pharmacy name (for changing amount change last parameter)
+GET http://localhost:9999/api/medicines/pharmacy_name/pharm3/5
+###
