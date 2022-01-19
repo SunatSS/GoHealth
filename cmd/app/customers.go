@@ -185,3 +185,40 @@ func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request) {
 	}
 	jsoner(w, customer, http.StatusOK)
 }
+
+//handleGetAllCustomers
+func (s *Server) handleGetAllCustomers(w http.ResponseWriter, r *http.Request) {
+	adminId, err := middleware.Authentication(r.Context())
+	if err != nil {
+		log.Println("handleMakeAdmin middleware.Authentication error:", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err == customers.ErrNotFound {
+		log.Println("handleMakeAdmin s.customersSvc.IsAdmin Not Found:", err)
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	} else if err != nil {
+		log.Println("handleMakeAdmin s.customersSvc.IsAdmin error:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	} else if !isAdmin {
+		log.Println("handleMakeAdmin s.customersSvc.IsAdmin isAdmin:", isAdmin)
+		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		return
+	}
+
+	customersArr, err := s.customersSvc.GetAllCustomers(r.Context())
+	if err == customers.ErrNotFound {
+		log.Println("handleGetAllCustomers s.customersSvc.GetAllCustomers Not Found:", err)
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	} else if err != nil {
+		log.Println("handleGetAllCustomers s.customersSvc.GetAllCustomers error:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	jsoner(w, customersArr, http.StatusOK)
+}

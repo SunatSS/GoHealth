@@ -27,3 +27,8 @@
         Method  GET
         Token   Required(admins)
         Return  (StatusOK, types.Customer)
++GetAll:
+        Path    ".../api/customers/all"
+        Method  GET
+        Token   Required(admins)
+        Return  (StatusOK, []types.Customer)

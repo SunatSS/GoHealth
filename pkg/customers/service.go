@@ -205,3 +205,27 @@ func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Custome
 
 	return customer, nil
 }
+
+//GetAllCustomers returns all customers
+func (s *Service) GetAllCustomers(ctx context.Context) ([]*types.Customer, error) {
+	var customers []*types.Customer
+	rows, err := s.pool.Query(ctx, `SELECT id, name, phone, address, password, is_admin, active, created FROM customers`)
+	if err != nil {
+		log.Println("GetAllCustomers s.pool.Query error:", err)
+		return nil, ErrInternal
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		customer := &types.Customer{}
+		err := rows.Scan(
+			&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Password, &customer.IsAdmin, &customer.Active, &customer.Created)
+		if err != nil {
+			log.Println("GetAllCustomers rows.Scan error:", err)
+			return nil, ErrInternal
+		}
+		customers = append(customers, customer)
+	}
+
+	return customers, nil
+}

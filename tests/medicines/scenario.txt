@@ -2,13 +2,13 @@
         Path    ".../api/medicines"
         Method  POST
         Token   Required(admin)
-        Enter   (ID-0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name) - types.Medicine
+        Enter   (ID-0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name, Active) - types.Medicine
         Return  (StatusOK, types.Medicine)
 +EditMedicine
         Path    ".../api/medicines"
         Method  POST
         Token   Required(admin)
-        Enter   (ID-non0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name) - types.Medicine
+        Enter   (ID-non0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name, Active) - types.Medicine
         Return  (StatusOK, types.Medicine)
 +GetMedicineByID
         Path    ".../api/medicines/id/1/5"

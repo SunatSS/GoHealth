@@ -47,3 +47,8 @@ Content-Type: application/json
 GET  http://localhost:9999/api/customers/7
 Authorization: defaultAdminsToken
 ###
+
+### Get all customers
+GET  http://localhost:9999/api/customers/all
+Authorization: defaultAdminsToken
+###

@@ -12,7 +12,8 @@ Content-Type: application/json
     "recipe_needed": true,
     "price": 10,
     "qty": 10,
-    "pharmacy_name": "pharm10"
+    "pharmacy_name": "pharm10",
+    "active": true
 }
 ###
 
@@ -30,7 +31,8 @@ Content-Type: application/json
     "recipe_needed": true,
     "price": 10,
     "qty": 10,
-    "pharmacy_name": "pharm5"
+    "pharmacy_name": "pharm5",
+    "active": false
 }
 ###
 

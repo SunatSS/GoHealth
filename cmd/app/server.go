@@ -38,6 +38,7 @@ func (s *Server) Init() {
 	customersSubrouter.Use(customersAuthenticateMd)
 
 	customersSubrouter.HandleFunc("", s.handleRegisterCustomer).Methods("POST")
+	customersSubrouter.HandleFunc("/all", s.handleGetAllCustomers).Methods("GET")
 	customersSubrouter.HandleFunc("/edit", s.handleEditCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/token", s.handleTokenForCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/admin", s.handleMakeAdmin).Methods("POST")
