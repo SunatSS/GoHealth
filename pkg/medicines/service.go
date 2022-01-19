@@ -18,10 +18,12 @@ var (
 	ErrInternal = errors.New("internal error")
 )
 
+// Service is a medicines service
 type Service struct {
 	pool *pgxpool.Pool
 }
 
+// NewService creates a new medicines service
 func NewService(pool *pgxpool.Pool) *Service {
 	return &Service{pool: pool}
 }

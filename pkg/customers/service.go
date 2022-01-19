@@ -26,17 +26,17 @@ var (
 	ErrExpired = errors.New("expired")
 )
 
-//Service is structure of customers service
+//Service is a customers service
 type Service struct {
 	pool *pgxpool.Pool
 }
 
-//NewService returns a new instance of Service
+//NewService creates new customers service
 func NewService(pool *pgxpool.Pool) *Service {
 	return &Service{pool: pool}
 }
 
-// RegisterCustomer method registers customer
+// RegisterCustomer registers customer
 func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*types.Customer, error) {
 	customer := &types.Customer{}
 
@@ -62,7 +62,7 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 	return customer, nil
 }
 
-// Token method generates token for customer
+// Token generates token for customer
 func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Token, error) {
 	var hash string
 	token := &types.Token{}
@@ -99,6 +99,7 @@ func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Toke
 	return token, nil
 }
 
+// IDByToken returns customer id by token
 func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 	var id int64
 	var expires time.Time
@@ -116,7 +117,7 @@ func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 	return id, nil
 }
 
-//EditCustomer method edits customer
+// EditCustomer edits customer
 func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error {
 	sqlBase := "UPDATE customers SET {col} = $1 WHERE id = $2 RETURNING id"
 	if item.Name != "" {
@@ -137,7 +138,7 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error 
 			return ErrInternal
 		}
 		item.Password = string(hash)
-		
+
 		sql := strings.ReplaceAll(sqlBase, "{col}", "password")
 		err = s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
 		if err == pgx.ErrNoRows {
@@ -163,6 +164,7 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error 
 	return nil
 }
 
+// IsAdmin checks if customer is admin
 func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, error) {
 	var isAdmin bool
 	err := s.pool.QueryRow(ctx, `SELECT is_admin FROM customers WHERE id = $1`, id).Scan(&isAdmin)
@@ -177,19 +179,18 @@ func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, error) {
 	return isAdmin, nil
 }
 
-func (s *Service) MakeAdmin(ctx context.Context, makeAdminInfo types.MakeAdminInfo) error {
+// MakeAdmin makes customer admin
+func (s *Service) MakeAdmin(ctx context.Context, makeAdminInfo *types.MakeAdminInfo) error {
 	_, err := s.pool.Exec(ctx, `UPDATE customers SET is_admin = $2 WHERE id = $1`, makeAdminInfo.ID, makeAdminInfo.AdminStatus)
-	if err == pgx.ErrNoRows {
-		log.Println("MakeAdmin s.pool.QueryRow No rows:", err)
-		return ErrNotFound
-	} else if err != nil {
-		log.Println("MakeAdmin s.pool.QueryRow error:", err)
+	if err != nil {
+		log.Println("MakeAdmin s.pool.Exec error:", err)
 		return ErrInternal
 	}
 
 	return nil
 }
 
+// GetCustomerById returns customer by id
 func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Customer, error) {
 	customer := &types.Customer{}
 	err := s.pool.QueryRow(ctx, `SELECT id, name, phone, address, password, is_admin, active, created FROM customers WHERE id = $1`, id).Scan(

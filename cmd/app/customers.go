@@ -60,6 +60,7 @@ func (s *Server) handleTokenForCustomer(w http.ResponseWriter, r *http.Request) 
 	jsoner(w, token, http.StatusOK)
 }
 
+//handleEditCustomer
 func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
 	var item *types.Customer
 	err := json.NewDecoder(r.Body).Decode(&item)
@@ -68,7 +69,7 @@ func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	
+
 	id, err := middleware.Authentication(r.Context())
 	if err != nil {
 		log.Println("handleTokenForCustomer middleware.Authentication error:", err)
@@ -114,14 +115,14 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var makeAdminInfo types.MakeAdminInfo
+	var makeAdminInfo *types.MakeAdminInfo
 	err = json.NewDecoder(r.Body).Decode(&makeAdminInfo)
 	if err != nil {
 		log.Println("handleMakeAdmin json.NewDecoder error:", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	
+
 	err = s.customersSvc.MakeAdmin(r.Context(), makeAdminInfo)
 	if err == customers.ErrNotFound {
 		log.Println("handleMakeAdmin s.customersSvc.MakeAdmin Not Found:", err)
@@ -136,7 +137,8 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 	jsoner(w, makeAdminInfo, http.StatusOK)
 }
 
-func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request)  {
+//handleGetCustomerByID
+func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request) {
 	adminId, err := middleware.Authentication(r.Context())
 	if err != nil {
 		log.Println("handleMakeAdmin middleware.Authentication error:", err)

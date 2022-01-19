@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//handleSaveMedicine
 func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	id, err := middleware.Authentication(r.Context())
 	if err != nil {
@@ -19,7 +20,7 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	
+
 	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), id)
 	if err == customers.ErrNotFound {
 		log.Println("handleSaveMedicine s.customersSvc.IsAdmin Not Found:", err)
@@ -53,6 +54,7 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	jsoner(w, medicine, http.StatusOK)
 }
 
+//handleGetMedicines
 func (s *Server) handleGetMedicines(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	column, ok := vars["column"]

@@ -48,7 +48,7 @@ func execute(host string, port string, dsn string) (err error) {
 	container := dig.New()
 	for _, dep := range deps {
 		err = container.Provide(dep)
-		if  err != nil {
+		if err != nil {
 			return err
 		}
 	}

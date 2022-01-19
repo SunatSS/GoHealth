@@ -11,14 +11,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//Server is structure for server with mux from net/http
+//Server is structure for server with mux from gorilla/mux
 type Server struct {
 	mux          *mux.Router
 	customersSvc *customers.Service
 	medicinesSvc *medicines.Service
 }
 
-//NewServer creates new server with mux from net/http
+//NewServer creates new server with mux from gorilla/mux
 func NewServer(mux *mux.Router, customersSvc *customers.Service, medicinesSvc *medicines.Service) *Server {
 	return &Server{mux: mux, customersSvc: customersSvc, medicinesSvc: medicinesSvc}
 }
@@ -33,7 +33,7 @@ func (s *Server) Init() {
 	s.mux.Use(middleware.Logger)
 
 	customersAuthenticateMd := middleware.Authenticate(s.customersSvc.IDByToken)
-	
+
 	customersSubrouter := s.mux.PathPrefix("/api/customers").Subrouter()
 	customersSubrouter.Use(customersAuthenticateMd)
 
@@ -42,7 +42,7 @@ func (s *Server) Init() {
 	customersSubrouter.HandleFunc("/token", s.handleTokenForCustomer).Methods("POST")
 	customersSubrouter.HandleFunc("/admin", s.handleMakeAdmin).Methods("POST")
 	customersSubrouter.HandleFunc("/{id}", s.handleGetCustomerByID).Methods("GET")
-	
+
 	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
 	medicinesSubrouter.Use(customersAuthenticateMd)
 
@@ -50,7 +50,7 @@ func (s *Server) Init() {
 	medicinesSubrouter.HandleFunc("/{column:(?:id|name|manafacturer|pharmacy_name)}/{value}/{limit}", s.handleGetMedicines).Methods("GET")
 }
 
-//function jsoner marshal interface to json and write to response writer
+//function jsoner marshal interfaces to json and write to response writer
 func jsoner(w http.ResponseWriter, v interface{}, code int) error {
 	data, err := json.Marshal(v)
 	if err != nil {

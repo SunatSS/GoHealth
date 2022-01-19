@@ -36,11 +36,13 @@ type Token struct {
 	Created    time.Time `json:"created"`
 }
 
+// MakeAdminInfo contains information for s.custumersSvc.MakeAdmin method
 type MakeAdminInfo struct {
-	ID int64 `json:"id"`
-	AdminStatus bool `json:"adminStatus"`
+	ID          int64 `json:"id"`
+	AdminStatus bool  `json:"adminStatus"`
 }
 
+// Type Medicine is structure for medicine
 type Medicine struct {
 	ID            int64     `json:"id"`
 	Name          string    `json:"name"`
