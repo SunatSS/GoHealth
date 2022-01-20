@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
-	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
 	"github.com/gorilla/mux"
 )
@@ -30,14 +29,14 @@ func (s *Server) handleRegisterCustomer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	customer, err := s.customersSvc.RegisterCustomer(r.Context(), item)
+	customer, statusCode, err := s.customersSvc.RegisterCustomer(r.Context(), item)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleRegisterCustomer s.customersSvc.RegisterCustomer error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, customer, http.StatusOK)
+	err = jsoner(w, customer, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleRegisterCustomer jsoner error:", err)
 		return
@@ -63,22 +62,14 @@ func (s *Server) handleTokenForCustomer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := s.customersSvc.Token(r.Context(), item)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleTokenForCustomer s.customersSvc.Token Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err == customers.ErrInvalidPassword {
-		loggers.ErrorLogger.Println("handleTokenForCustomer s.customersSvc.Token Invalid Password:", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	} else if err != nil {
+	token, statusCode, err := s.customersSvc.Token(r.Context(), item)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleTokenForCustomer s.customersSvc.Token error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, token, http.StatusOK)
+	err = jsoner(w, token, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleTokenForCustomer jsoner error:", err)
 		return
@@ -112,18 +103,14 @@ func (s *Server) handleEditCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 	item.ID = id
 
-	err = s.customersSvc.EditCustomer(r.Context(), item)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleTokenForCustomer s.customersSvc.Token Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	statusCode, err := s.customersSvc.EditCustomer(r.Context(), item)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleTokenForCustomer s.customersSvc.Token error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, item, http.StatusOK)
+	err = jsoner(w, item, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleTokenForCustomer jsoner error:", err)
 		return
@@ -147,16 +134,13 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	isAdmin, statusCode, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
-	} else if !isAdmin {
+	}
+	if !isAdmin {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin isAdmin:", isAdmin)
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
@@ -170,18 +154,14 @@ func (s *Server) handleMakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.customersSvc.MakeAdmin(r.Context(), makeAdminInfo)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.MakeAdmin Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	statusCode, err = s.customersSvc.MakeAdmin(r.Context(), makeAdminInfo)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.MakeAdmin error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, makeAdminInfo, http.StatusOK)
+	err = jsoner(w, makeAdminInfo, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleMakeAdmin jsoner error:", err)
 		return
@@ -204,16 +184,13 @@ func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	isAdmin, statusCode, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
-	} else if !isAdmin {
+	}
+	if !isAdmin {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin isAdmin:", isAdmin)
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
@@ -232,17 +209,13 @@ func (s *Server) handleGetCustomerByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := s.customersSvc.GetCustomerByID(r.Context(), id)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleGetCustomerByID s.customersSvc.GetCustomerByID Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	customer, statusCode, err := s.customersSvc.GetCustomerByID(r.Context(), id)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleGetCustomerByID s.customersSvc.GetCustomerByID error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
-	err = jsoner(w, customer, http.StatusOK)
+	err = jsoner(w, customer, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleGetCustomerByID jsoner error:", err)
 		return
@@ -265,33 +238,26 @@ func (s *Server) handleGetAllCustomers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), adminId)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	isAdmin, statusCode, err := s.customersSvc.IsAdmin(r.Context(), adminId)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
-	} else if !isAdmin {
+	}
+	if !isAdmin {
 		loggers.ErrorLogger.Println("handleMakeAdmin s.customersSvc.IsAdmin isAdmin:", isAdmin)
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}
 
-	customersArr, err := s.customersSvc.GetAllCustomers(r.Context())
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleGetAllCustomers s.customersSvc.GetAllCustomers Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	} else if err != nil {
+	customersArr, statusCode, err := s.customersSvc.GetAllCustomers(r.Context())
+	if err != nil {
 		loggers.ErrorLogger.Println("handleGetAllCustomers s.customersSvc.GetAllCustomers error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, customersArr, http.StatusOK)
+	err = jsoner(w, customersArr, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleGetAllCustomers jsoner error:", err)
 		return

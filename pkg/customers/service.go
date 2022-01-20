@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -37,13 +38,13 @@ func NewService(pool *pgxpool.Pool) *Service {
 }
 
 // RegisterCustomer registers customer
-func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*types.Customer, error) {
+func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*types.Customer, int, error) {
 	customer := &types.Customer{}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println("Save bcrypt.GenerateFromPassword Error:", err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
 	item.Password = string(hash)
@@ -56,47 +57,47 @@ func (s *Service) RegisterCustomer(ctx context.Context, item *types.RegInfo) (*t
 		&customer.Address, &customer.Active, &customer.Created)
 	if err != nil {
 		log.Println("Save with id == 0 s.pool.QueryRow error:", err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
-	return customer, nil
+	return customer, http.StatusOK, nil
 }
 
 // Token generates token for customer
-func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Token, error) {
+func (s *Service) Token(ctx context.Context, item *types.TokenInfo) (*types.Token, int, error) {
 	var hash string
 	token := &types.Token{}
 	err := s.pool.QueryRow(ctx, `SELECT id, password FROM customers WHERE phone = $1`, item.Login).Scan(&token.CustomerID, &hash)
 	if err == pgx.ErrNoRows {
 		log.Println("Token s.pool.QueryRow error:", err)
-		return nil, ErrNotFound
+		return nil, http.StatusNotFound, ErrNotFound
 	}
 	if err != nil {
 		log.Println(err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(item.Password))
 	if err != nil {
 		log.Println("Token bcrypt.CompareHashAndPassword error:", err)
-		return nil, ErrInvalidPassword
+		return nil, http.StatusUnauthorized, ErrInvalidPassword
 	}
 
 	buffer := make([]byte, 256)
 	n, err := rand.Read(buffer)
 	if n != len(buffer) || err != nil {
 		log.Println("Token rand.Read len : %w (must be 256), error: %w", n, err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
 	token.Token = hex.EncodeToString(buffer)
 	_, err = s.pool.Exec(ctx, `INSERT INTO customers_tokens (customer_id, token) VALUES ($1, $2)`, token.CustomerID, token.Token)
 	if err != nil {
 		log.Println("Token s.pool.Exec error:", err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
-	return token, nil
+	return token, http.StatusOK, nil
 }
 
 // IDByToken returns customer id by token
@@ -118,24 +119,25 @@ func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 }
 
 // EditCustomer edits customer
-func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error {
+func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (int, error) {
 	sqlBase := "UPDATE customers SET {col} = $1 WHERE id = $2 RETURNING id"
 	if item.Name != "" {
 		sql := strings.ReplaceAll(sqlBase, "{col}", "name")
 		err := s.pool.QueryRow(ctx, sql, item.Name, item.ID).Scan(&item.ID)
 		if err == pgx.ErrNoRows {
 			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return ErrNotFound
-		} else if err != nil {
+			return http.StatusNotFound, ErrNotFound
+		} 
+		if err != nil {
 			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return ErrInternal
+			return http.StatusInternalServerError, ErrInternal
 		}
 	}
 	if item.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
 		if err != nil {
 			log.Println("EditCustomer bcrypt.GenerateFromPassword Error:", err)
-			return ErrInternal
+			return http.StatusInternalServerError, ErrInternal
 		}
 		item.Password = string(hash)
 
@@ -143,10 +145,11 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error 
 		err = s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
 		if err == pgx.ErrNoRows {
 			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return ErrNotFound
-		} else if err != nil {
+			return http.StatusNotFound, ErrNotFound
+		}
+		if err != nil {
 			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return ErrInternal
+			return http.StatusInternalServerError, ErrInternal
 		}
 	}
 	if item.Address != "" {
@@ -154,65 +157,68 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) error 
 		err := s.pool.QueryRow(ctx, sql, item.Address, item.ID).Scan(&item.ID)
 		if err == pgx.ErrNoRows {
 			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return ErrNotFound
-		} else if err != nil {
+			return http.StatusNotFound, ErrNotFound
+		}
+		if err != nil {
 			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return ErrInternal
+			return http.StatusInternalServerError, ErrInternal
 		}
 	}
 
-	return nil
+	return http.StatusOK, nil
 }
 
 // IsAdmin checks if customer is admin
-func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, error) {
+func (s *Service) IsAdmin(ctx context.Context, id int64) (bool, int, error) {
 	var isAdmin bool
 	err := s.pool.QueryRow(ctx, `SELECT is_admin FROM customers WHERE id = $1`, id).Scan(&isAdmin)
 	if err == pgx.ErrNoRows {
 		log.Println("IsAdmin s.pool.QueryRow No rows:", err)
-		return false, ErrNotFound
-	} else if err != nil {
+		return false, http.StatusNotFound, ErrNotFound
+	}
+	if err != nil {
 		log.Println("IsAdmin s.pool.QueryRow error:", err)
-		return false, ErrInternal
+		return false, http.StatusInternalServerError, ErrInternal
 	}
 
-	return isAdmin, nil
+	return isAdmin, http.StatusOK, nil
 }
 
 // MakeAdmin makes customer admin
-func (s *Service) MakeAdmin(ctx context.Context, makeAdminInfo *types.MakeAdminInfo) error {
+func (s *Service) MakeAdmin(ctx context.Context, makeAdminInfo *types.MakeAdminInfo) (int, error) {
 	_, err := s.pool.Exec(ctx, `UPDATE customers SET is_admin = $2 WHERE id = $1`, makeAdminInfo.ID, makeAdminInfo.AdminStatus)
 	if err != nil {
 		log.Println("MakeAdmin s.pool.Exec error:", err)
-		return ErrInternal
+		return http.StatusInternalServerError, ErrInternal
 	}
 
-	return nil
+	return http.StatusOK, nil
 }
 
 // GetCustomerById returns customer by id
-func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Customer, error) {
+func (s *Service) GetCustomerByID(ctx context.Context, id int64) (*types.Customer, int, error) {
 	customer := &types.Customer{}
 	err := s.pool.QueryRow(ctx, `SELECT id, name, phone, address, password, is_admin, active, created FROM customers WHERE id = $1`, id).Scan(
 		&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Password, &customer.IsAdmin, &customer.Active, &customer.Created)
 	if err == pgx.ErrNoRows {
 		log.Println("GetCustomerByID s.pool.QueryRow No rows:", err)
-		return nil, ErrNotFound
-	} else if err != nil {
+		return nil, http.StatusNotFound, ErrNotFound
+	}
+	if err != nil {
 		log.Println("GetCustomerByID s.pool.QueryRow error:", err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 
-	return customer, nil
+	return customer, http.StatusOK, nil
 }
 
 //GetAllCustomers returns all customers
-func (s *Service) GetAllCustomers(ctx context.Context) ([]*types.Customer, error) {
+func (s *Service) GetAllCustomers(ctx context.Context) ([]*types.Customer, int, error) {
 	var customers []*types.Customer
 	rows, err := s.pool.Query(ctx, `SELECT id, name, phone, address, password, is_admin, active, created FROM customers`)
 	if err != nil {
 		log.Println("GetAllCustomers s.pool.Query error:", err)
-		return nil, ErrInternal
+		return nil, http.StatusInternalServerError, ErrInternal
 	}
 	defer rows.Close()
 
@@ -222,10 +228,10 @@ func (s *Service) GetAllCustomers(ctx context.Context) ([]*types.Customer, error
 			&customer.ID, &customer.Name, &customer.Phone, &customer.Address, &customer.Password, &customer.IsAdmin, &customer.Active, &customer.Created)
 		if err != nil {
 			log.Println("GetAllCustomers rows.Scan error:", err)
-			return nil, ErrInternal
+			return nil, http.StatusInternalServerError, ErrInternal
 		}
 		customers = append(customers, customer)
 	}
 
-	return customers, nil
+	return customers, http.StatusInternalServerError, nil
 }

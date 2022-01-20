@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
-	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
 	"github.com/gorilla/mux"
 )
@@ -27,7 +26,7 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	loggers.InfoLogger.Println("handleSaveMedicine start")
-		
+
 	id, err := middleware.Authentication(r.Context())
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine middleware.Authentication error:", err)
@@ -35,16 +34,13 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isAdmin, err := s.customersSvc.IsAdmin(r.Context(), id)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleSaveMedicine s.customersSvc.IsAdmin Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	} else if err != nil {
+	isAdmin, statusCode, err := s.customersSvc.IsAdmin(r.Context(), id)
+	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine s.customersSvc.IsAdmin error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
-	} else if !isAdmin {
+	}
+	if !isAdmin {
 		loggers.ErrorLogger.Println("handleSaveMedicine s.customersSvc.IsAdmin isAdmin:", isAdmin)
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
@@ -105,14 +101,14 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	dir := strconv.FormatInt(time.Now().Unix(), 32)
 	loadFile(file, dir, "../images/", item.File)
 
-	medicine, err := s.medicinesSvc.Save(r.Context(), &item)
+	medicine, statusCode, err := s.medicinesSvc.Save(r.Context(), &item)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine s.medicinesSvc.Save error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, medicine, http.StatusOK)
+	err = jsoner(w, medicine, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine jsoner error:", err)
 		return
@@ -155,19 +151,14 @@ func (s *Server) handleGetMedicines(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	medicines, err := s.medicinesSvc.GetSomeMedicines(r.Context(), column, value, limit)
-	if err == customers.ErrNotFound {
-		loggers.ErrorLogger.Println("handleGetMedicines s.medicinesSvc.GetSomeMedicines Not Found:", err)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	}
+	medicines, statusCode, err := s.medicinesSvc.GetSomeMedicines(r.Context(), column, value, limit)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleGetMedicines s.medicinesSvc.GetSomeMedicines error:", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(statusCode), statusCode)
 		return
 	}
 
-	err = jsoner(w, medicines, http.StatusOK)
+	err = jsoner(w, medicines, statusCode)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleGetMedicines jsoner error:", err)
 		return
@@ -179,15 +170,16 @@ func loadFile(file multipart.File, dir string, path string, namefile string) err
 	if err != nil {
 		panic(err)
 	}
+
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return errors.New("not readble data")
+		return errors.New("can not read data")
 	}
 
 	err = ioutil.WriteFile(path+dir+"/"+namefile, data, 0666)
-
 	if err != nil {
-		return errors.New("not saved from folder ")
+		return errors.New("can not saved")
 	}
+
 	return nil
 }
