@@ -1,32 +1,3 @@
-### Save medicine
-POST http://localhost:9999/api/medicines
-Authorization: defaultAdminsToken
-Content-Type: application/json
-
-{
-    "id": 0,
-    "name": "med10",
-    "manafacturer": "man10",
-    "description": "desc10",
-    "components": ["comp1", "comp2"],
-    "recipe_needed": true,
-    "price": 10,
-    "qty": 10,
-    "pharmacy_name": "pharm10",
-    "active": true
-}
-###
-
-### Edit medicine
-POST http://localhost:9999/api/medicines
-Authorization: defaultAdminsToken
-Content-Type: multipart/form-data; boundary=-------------573cf973d5228
-
-{
-    
-}
-###
-
 ### Get medicine by id
 GET http://localhost:9999/api/medicines/id/1/1
 ###

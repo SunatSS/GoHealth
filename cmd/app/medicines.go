@@ -50,7 +50,7 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var item *types.Medicine
+	var item types.Medicine
 	err = r.ParseMultipartForm(64 << 40)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine r.ParseMultipartForm error:", err)
@@ -102,10 +102,10 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	}
 	item.Image = imageExt
 	item.File = item.Name + "." + imageExt
-	dir := strconv.FormatInt(time.Now().Unix(), 64)
+	dir := strconv.FormatInt(time.Now().Unix(), 32)
 	loadFile(file, dir, "../images/", item.File)
 
-	medicine, err := s.medicinesSvc.Save(r.Context(), item)
+	medicine, err := s.medicinesSvc.Save(r.Context(), &item)
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine s.medicinesSvc.Save error:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
