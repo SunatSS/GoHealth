@@ -1,6 +1,17 @@
 package types
 
-import "time"
+import (
+	"log"
+	"os"
+	"time"
+)
+
+var (
+	// Logger for INFO messages
+	InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	// Logger for ERROR messages
+	ErrorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Llongfile)
+)
 
 // Type RegInfo is structure for registration info
 type RegInfo struct {

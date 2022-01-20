@@ -1,0 +1,12 @@
+INFO	2022/01/20 16:22:20 handleRegisterCustomer started
+ERROR	2022/01/20 16:22:20 customers.go:34: handleRegisterCustomer s.customersSvc.RegisterCustomer error: internal error
+INFO	2022/01/20 16:27:34 handleRegisterCustomer started
+ERROR	2022/01/20 16:27:34 customers.go:34: handleRegisterCustomer s.customersSvc.RegisterCustomer error: internal error
+INFO	2022/01/20 16:27:46 handleRegisterCustomer started
+INFO	2022/01/20 16:27:47 handleRegisterCustomer finished with any error!
+
+INFO	2022/01/20 16:36:54 handleRegisterCustomer started
+ERROR	2022/01/20 16:36:54 customers.go:34: handleRegisterCustomer s.customersSvc.RegisterCustomer error: internal error
+
+INFO	2022/01/20 16:37:04 handleRegisterCustomer started
+INFO	2022/01/20 16:37:04 handleRegisterCustomer finished with any error!
