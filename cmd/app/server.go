@@ -31,6 +31,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //Init initializes server
 func (s *Server) Init() {
 	s.mux.Use(middleware.Logger)
+	s.mux.Use(middleware.LoggersFuncs)
 
 	customersAuthenticateMd := middleware.Authenticate(s.customersSvc.IDByToken)
 
