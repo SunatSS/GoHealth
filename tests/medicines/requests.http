@@ -20,19 +20,10 @@ Content-Type: application/json
 ### Edit medicine
 POST http://localhost:9999/api/medicines
 Authorization: defaultAdminsToken
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=-------------573cf973d5228
 
 {
-    "id": 1,
-    "name": "med5",
-    "manafacturer": "man5",
-    "description": "desc5",
-    "components": ["comp1", "comp2"],
-    "recipe_needed": true,
-    "price": 10,
-    "qty": 10,
-    "pharmacy_name": "pharm5",
-    "active": false
+    
 }
 ###
 

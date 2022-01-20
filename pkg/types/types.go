@@ -55,4 +55,6 @@ type Medicine struct {
 	PharmacyName  string    `json:"pharmacy_name"`
 	Active        bool      `json:"active"`
 	Created       time.Time `json:"created"`
+	Image         string    `json:"image"`
+	File          string    `json:"file"`
 }

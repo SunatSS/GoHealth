@@ -1,10 +1,16 @@
 package app
 
 import (
-	"encoding/json"
+	"errors"
+	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/SYSTEMTerror/GoHealth/cmd/app/middleware"
 	"github.com/SYSTEMTerror/GoHealth/pkg/customers"
@@ -37,12 +43,59 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var item *types.Medicine
-	err = json.NewDecoder(r.Body).Decode(&item)
+	err = r.ParseMultipartForm(64 << 40)
 	if err != nil {
-		log.Println("handleSaveMedicine json.NewDecoder error:", err)
+		log.Println("handleSaveMedicine r.ParseMultipartForm error:", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
+
+	item.ID, err = strconv.ParseInt(r.FormValue("id"), 10, 64)
+	if err != nil {
+		log.Println("handleSaveMedicine r.FormValue(id) parsing error:", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	item.Name = r.FormValue("name")
+	item.Manafacturer = r.FormValue("manafacturer")
+	item.Description = r.FormValue("description")
+	item.Components = strings.Split(r.FormValue("components"), ", ")
+	item.Recipe_needed, err = strconv.ParseBool(r.FormValue("recipe_needed"))
+	if err != nil {
+		log.Println("handleSaveMedicine r.FormValue(recipe_needed) parsing error:", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	item.Price, err = strconv.Atoi(r.FormValue("price"))
+	if err != nil {
+		log.Println("handleSaveMedicine r.FormValue(price) parsing error:", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	item.Qty, err = strconv.Atoi(r.FormValue("qty"))
+	if err != nil {
+		log.Println("handleSaveMedicine r.FormValue(qty) parsing error:", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	item.PharmacyName = r.FormValue("pharmacy_name")
+	item.Active, err = strconv.ParseBool(r.FormValue("active"))
+	if err != nil {
+		log.Println("handleSaveMedicine r.FormValue(active) parsing error:", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	imageExt := filepath.Ext(r.FormValue("image"))
+	file, fileHeader, err := r.FormFile("image")
+	if err == nil {
+		var name = strings.Split(fileHeader.Filename, ".")
+		imageExt = name[len(name)-1]
+	}
+	item.Image = imageExt
+	item.File = item.Name + "." + imageExt
+	dir := strconv.FormatInt(time.Now().Unix(), 64)
+	loadFile(file, dir, "../images/", item.File)
 
 	medicine, err := s.medicinesSvc.Save(r.Context(), item)
 	if err != nil {
@@ -95,4 +148,22 @@ func (s *Server) handleGetMedicines(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsoner(w, medicines, http.StatusOK)
+}
+
+func loadFile(file multipart.File, dir string, path string, namefile string) error {
+	err := os.MkdirAll(path+dir, 0777)
+	if err != nil {
+		panic(err)
+	}
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return errors.New("not readble data")
+	}
+
+	err = ioutil.WriteFile(path+dir+"/"+namefile, data, 0666)
+
+	if err != nil {
+		return errors.New("not saved from folder ")
+	}
+	return nil
 }

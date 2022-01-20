@@ -5,7 +5,7 @@ CREATE TABLE customers
     name     TEXT        NOT NULL,
     phone    TEXT        NOT NULL UNIQUE,
     password TEXT        NOT NULL,
-    address  TEXT,
+    address  TEXT        DEFAULT '',
     is_admin BOOLEAN     NOT NULL DEFAULT FALSE,
     active   BOOLEAN     NOT NULL DEFAULT TRUE,
     created  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -33,5 +33,7 @@ CREATE TABLE medicines
     qty             INTEGER     NOT NULL DEFAULT 0,
     pharmacy_name   TEXT        NOT NULL,
     active          BOOLEAN     NOT NULL DEFAULT TRUE,
-    created         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    image           TEXT        DEFAULT '',
+    file            TEXT        DEFAULT ''
 );
