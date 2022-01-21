@@ -2,14 +2,14 @@
         Path    ".../api/medicines"
         Method  POST
         Token   Required(admin)
-        Enter   (ID-0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name, Active) - types.Medicine
+        Enter   (ID-0, Name, Manafacturer, Description, Components-separeted by (", "), Recipe_needed-bool, Price, Qty, Pharmacy_name, Active, file) - types.Medicine
         Return  (StatusOK, types.Medicine)
         P.S. for tests was used Thunder client VSCide extension
 +EditMedicine
         Path    ".../api/medicines"
         Method  POST
         Token   Required(admin)
-        Enter   (ID-non0, Name, Manafacturer, Description, Components-[]text, Recipe_needed-bool, Price, Qty, Pharmacy_name, Active) - types.Medicine
+        Enter   (ID-non0, Name, Manafacturer, Description, Components-separeted by (", "), Recipe_needed-bool, Price, Qty, Pharmacy_name, Active, file) - types.Medicine
         Return  (StatusOK, types.Medicine)
         P.S. for tests was used Thunder client VSCide extension
 +GetMedicineByID

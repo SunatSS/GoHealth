@@ -55,17 +55,19 @@ type MakeAdminInfo struct {
 
 // Type Medicine is structure for medicine
 type Medicine struct {
-	ID            int64     `json:"id"`
-	Name          string    `json:"name"`
-	Manafacturer  string    `json:"manafacturer"`
-	Description   string    `json:"description"`
-	Components    []string  `json:"components"`
-	Recipe_needed bool      `json:"recipe_needed"`
-	Price         int       `json:"price"`
-	Qty           int       `json:"qty"`
-	PharmacyName  string    `json:"pharmacy_name"`
-	Active        bool      `json:"active"`
-	Created       time.Time `json:"created"`
-	Image         string    `json:"image"`
-	File          string    `json:"file"`
+	ID              int64     `json:"id"`
+	Name            string    `json:"name"`
+	Manafacturer    string    `json:"manafacturer"`
+	Description     string    `json:"description"`
+	Components      []string  `json:"components"`
+	Recipe_needed   bool      `json:"recipe_needed"`
+	Price           int       `json:"price"`
+	Qty             int       `json:"qty"`
+	PharmacyName    string    `json:"pharmacy_name"`
+	PharmacyPhone   string    `json:"pharmacy_phone"`
+	PharmacyAddress string    `json:"pharmacy_address"`
+	Active          bool      `json:"active"`
+	Created         time.Time `json:"created"`
+	Image           string    `json:"image"`
+	File            string    `json:"file"`
 }

@@ -151,6 +151,7 @@ func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (int, 
 	return http.StatusOK, nil
 }
 
+// Validates customer data
 func validate(item *types.Customer) error {
 	if item.Name == "" {
 		return ErrEmptyName

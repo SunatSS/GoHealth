@@ -34,9 +34,9 @@ func (s *Service) GetSomeMedicines(ctx context.Context, column string, value str
 	items := make([]*types.Medicine, 0)
 	var sql string
 	if column == "" || value == "" {
-		sql = fmt.Sprintf("SELECT id, name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name, active, created, image, file FROM medicines WHERE active = true ORDER BY id LIMIT %v", limit)
+		sql = fmt.Sprintf("SELECT id, name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name, pharmacy_phone, pharmacy_address, active, created, image, file FROM medicines WHERE active = true ORDER BY id LIMIT %v", limit)
 	} else {
-		sql = fmt.Sprintf("SELECT id, name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name, active, created, image, file FROM medicines WHERE %v = '%v' AND active = true ORDER BY id LIMIT %v", column, value, limit)
+		sql = fmt.Sprintf("SELECT id, name, manafacturer, description, components, recipe_needed, price, qty, pharmacy_name, pharmacy_phone, pharmacy_address, active, created, image, file FROM medicines WHERE %v = '%v' AND active = true ORDER BY id LIMIT %v", column, value, limit)
 	}
 	rows, err := s.pool.Query(ctx, sql)
 	if err == pgx.ErrNoRows {
@@ -50,7 +50,7 @@ func (s *Service) GetSomeMedicines(ctx context.Context, column string, value str
 	defer rows.Close()
 	for rows.Next() {
 		item := &types.Medicine{}
-		err = rows.Scan(&item.ID, &item.Name, &item.Manafacturer, &item.Description, &item.Components, &item.Recipe_needed, &item.Price, &item.Qty, &item.PharmacyName, &item.Active, &item.Created, &item.Image, &item.File)
+		err = rows.Scan(&item.ID, &item.Name, &item.Manafacturer, &item.Description, &item.Components, &item.Recipe_needed, &item.Price, &item.Qty, &item.PharmacyName, &item.PharmacyPhone, &item.PharmacyAddress, &item.Active, &item.Created, &item.Image, &item.File)
 		if err != nil {
 			log.Println("Medicines rows.Scan ERROR:", err)
 			return nil, http.StatusInternalServerError, ErrInternal

@@ -83,6 +83,8 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	item.PharmacyName = r.FormValue("pharmacy_name")
+	item.PharmacyPhone = r.FormValue("pharmacy_phone")
+	item.PharmacyAddress = r.FormValue("pharmacy_address")
 	item.Active, err = strconv.ParseBool(r.FormValue("active"))
 	if err != nil {
 		loggers.ErrorLogger.Println("handleSaveMedicine r.FormValue(active) parsing error:", err)

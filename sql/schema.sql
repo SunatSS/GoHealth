@@ -23,17 +23,19 @@ CREATE TABLE customers_tokens
 -- table of medicines
 CREATE TABLE medicines 
 (
-    id              BIGSERIAL   PRIMARY KEY,
-    name            TEXT        NOT NULL,
-    manafacturer    TEXT        NOT NULL,
-    description     TEXT        NOT NULL,
-    components      TEXT[],
-    recipe_needed   BOOLEAN     NOT NULL DEFAULT FALSE,
-    price           INTEGER     NOT NULL CHECK ( price > 0 ),
-    qty             INTEGER     NOT NULL DEFAULT 0,
-    pharmacy_name   TEXT        NOT NULL,
-    active          BOOLEAN     NOT NULL DEFAULT TRUE,
-    created         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    image           TEXT        DEFAULT '',
-    file            TEXT        DEFAULT ''
+    id                  BIGSERIAL   PRIMARY KEY,
+    name                TEXT        NOT NULL,
+    manafacturer        TEXT        NOT NULL,
+    description         TEXT        NOT NULL,
+    components          TEXT[],
+    recipe_needed       BOOLEAN     NOT NULL DEFAULT FALSE,
+    price               INTEGER     NOT NULL CHECK ( price > 0 ),
+    qty                 INTEGER     NOT NULL DEFAULT 0,
+    pharmacy_name       TEXT        NOT NULL,
+    pharmacy_phone      TEXT        NOT NULL,
+    pharmacy_address    TEXT        NOT NULL,
+    active              BOOLEAN     NOT NULL DEFAULT TRUE,
+    created             TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    image               TEXT        DEFAULT '',
+    file                TEXT        DEFAULT ''
 );
