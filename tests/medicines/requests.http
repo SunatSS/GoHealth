@@ -13,3 +13,31 @@ GET http://localhost:9999/api/medicines/manafacturer/man2/5
 ### Get 5 medicines by pharmacy name (for changing amount change last parameter)
 GET http://localhost:9999/api/medicines/pharmacy_name/pharm3/5
 ###
+
+###
+POST http://localhost:9999/api/orders
+Content-Type: application/json
+
+{
+    "customer_id": 1,
+    "medicine_id": 1,
+    "pharmacy_name": "pharm3",
+    "qty": 1,
+    "price": 10
+}
+###
+
+###
+GET http://localhost:9999/api/orders/all
+Authorization: defaultAdminsToken
+###
+
+###
+GET http://localhost:9999/api/orders/1
+Authorization: defaultAdminsToken
+###
+
+###
+POST http://localhost:9999/api/orders/1/confirmed
+Authorization: defaultAdminsToken
+###

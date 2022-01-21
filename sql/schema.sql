@@ -39,3 +39,16 @@ CREATE TABLE medicines
     image               TEXT        DEFAULT '',
     file                TEXT        DEFAULT ''
 );
+
+-- table of orders
+CREATE TABLE orders 
+(
+    id                  BIGSERIAL   PRIMARY KEY,
+    customer_id         BIGINT      NOT NULL    REFERENCES customers,
+    medicine_id         BIGINT      NOT NULL    REFERENCES medicines,
+    pharmacy_name       TEXT        NOT NULL,
+    qty                 INTEGER     NOT NULL    CHECK ( qty > 0 ),
+    price               INTEGER     NOT NULL    CHECK ( price > 0 ),
+    status              TEXT        NOT NULL    DEFAULT 'inProgress',
+    created             TIMESTAMP   NOT NULL    DEFAULT CURRENT_TIMESTAMP
+);

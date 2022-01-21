@@ -71,3 +71,15 @@ type Medicine struct {
 	Image           string    `json:"image"`
 	File            string    `json:"file"`
 }
+
+// Type Order contains order info
+type Order struct {
+	ID           int64     `json:"id"`
+	CustomerID   int64     `json:"customer_id"`
+	MedicineID   int64     `json:"medicine_id"`
+	PharmacyName string    `json:"pharmacy_name"`
+	Qty          int       `json:"qty"`
+	Price        int       `json:"price"`
+	Status       string    `json:"status"`
+	Created      time.Time `json:"created"`
+}
