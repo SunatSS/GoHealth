@@ -98,7 +98,7 @@ func (s *Server) handleSaveMedicine(w http.ResponseWriter, r *http.Request) {
 	}
 	item.Image = imageExt
 	item.File = item.Name + "." + imageExt
-	dir := strconv.FormatInt(time.Now().Unix(), 32)
+	dir := strconv.FormatInt(time.Now().Unix(), 36)
 	loadFile(file, dir, "../images/", item.File)
 
 	medicine, statusCode, err := s.medicinesSvc.Save(r.Context(), &item)

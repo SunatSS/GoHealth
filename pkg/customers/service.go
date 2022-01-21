@@ -7,7 +7,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/SYSTEMTerror/GoHealth/pkg/types"
@@ -25,6 +24,12 @@ var (
 	ErrInternal = errors.New("internal error")
 	//ErrExpired is returned when token is expired
 	ErrExpired = errors.New("expired")
+	//ErrEmptyName is returned when name is empty
+	ErrEmptyName = errors.New("empty name")
+	//ErrEmptyPassword is returned when password is empty
+	ErrEmptyPassword = errors.New("empty password")
+	//ErrEmptyAddress is returned when address is empty
+	ErrEmptyAddress = errors.New("empty address")
 )
 
 //Service is a customers service
@@ -120,52 +125,43 @@ func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
 
 // EditCustomer edits customer
 func (s *Service) EditCustomer(ctx context.Context, item *types.Customer) (int, error) {
-	sqlBase := "UPDATE customers SET {col} = $1 WHERE id = $2 RETURNING id"
-	if item.Name != "" {
-		sql := strings.ReplaceAll(sqlBase, "{col}", "name")
-		err := s.pool.QueryRow(ctx, sql, item.Name, item.ID).Scan(&item.ID)
-		if err == pgx.ErrNoRows {
-			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return http.StatusNotFound, ErrNotFound
-		} 
-		if err != nil {
-			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return http.StatusInternalServerError, ErrInternal
-		}
+	err := validate(item)
+	if err != nil {
+		log.Println("EditCustomer validate error:", err)
+		return http.StatusBadRequest, err
 	}
-	if item.Password != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Println("EditCustomer bcrypt.GenerateFromPassword Error:", err)
-			return http.StatusInternalServerError, ErrInternal
-		}
-		item.Password = string(hash)
-
-		sql := strings.ReplaceAll(sqlBase, "{col}", "password")
-		err = s.pool.QueryRow(ctx, sql, item.Password, item.ID).Scan(&item.ID)
-		if err == pgx.ErrNoRows {
-			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return http.StatusNotFound, ErrNotFound
-		}
-		if err != nil {
-			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return http.StatusInternalServerError, ErrInternal
-		}
+	hash, err := bcrypt.GenerateFromPassword([]byte(item.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println("EditCustomer bcrypt.GenerateFromPassword Error:", err)
+		return http.StatusInternalServerError, ErrInternal
 	}
-	if item.Address != "" {
-		sql := strings.ReplaceAll(sqlBase, "{col}", "address")
-		err := s.pool.QueryRow(ctx, sql, item.Address, item.ID).Scan(&item.ID)
-		if err == pgx.ErrNoRows {
-			log.Println("EditCustomer s.pool.QueryRow No rows:", err)
-			return http.StatusNotFound, ErrNotFound
-		}
-		if err != nil {
-			log.Println("EditCustomer s.pool.QueryRow error:", err)
-			return http.StatusInternalServerError, ErrInternal
-		}
+	item.Password = string(hash)
+	err = s.pool.QueryRow(ctx, `
+		UPDATE customers SET name = $2, password = $3, address = $4 WHERE id = $1 RETURNING id
+	`,item.ID, item.Name, item.Password, item.Address).Scan(&item.ID)
+	if err == pgx.ErrNoRows {
+		log.Println("EditCustomer s.pool.QueryRow No rows:", err)
+		return http.StatusNotFound, ErrNotFound
+	}
+	if err != nil {
+		log.Println("EditCustomer s.pool.QueryRow error:", err)
+		return http.StatusInternalServerError, ErrInternal
 	}
 
 	return http.StatusOK, nil
+}
+
+func validate(item *types.Customer) error {
+	if item.Name == "" {
+		return ErrEmptyName
+	}
+	if item.Password == "" {
+		return ErrEmptyPassword
+	}
+	if item.Address == "" {
+		return ErrEmptyAddress
+	}
+	return nil
 }
 
 // IsAdmin checks if customer is admin
@@ -233,5 +229,5 @@ func (s *Service) GetAllCustomers(ctx context.Context) ([]*types.Customer, int, 
 		customers = append(customers, customer)
 	}
 
-	return customers, http.StatusInternalServerError, nil
+	return customers, http.StatusOK, nil
 }
