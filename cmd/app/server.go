@@ -45,6 +45,14 @@ func (s *Server) Init() {
 	customersSubrouter.HandleFunc("/all", s.handleGetAllCustomers).Methods("GET")
 	customersSubrouter.HandleFunc("/{id}", s.handleGetCustomerByID).Methods("GET")
 
+	orderSubrouter := s.mux.PathPrefix("/api/orders").Subrouter()
+	orderSubrouter.Use(customersAuthenticateMd)
+
+	orderSubrouter.HandleFunc("", s.handleOrder).Methods("POST")
+	orderSubrouter.HandleFunc("/all", s.handleGetAllOrders).Methods("GET")
+	orderSubrouter.HandleFunc("/{id}", s.handleGetOrderByID).Methods("GET")
+	orderSubrouter.HandleFunc("/{id}/{status:(?:confirmed|inprogress|declared)}", s.handleChangeOrderStatus).Methods("POST")
+	
 	medicinesSubrouter := s.mux.PathPrefix("/api/medicines").Subrouter()
 	medicinesSubrouter.Use(customersAuthenticateMd)
 

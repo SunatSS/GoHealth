@@ -1,0 +1,35 @@
+
+INFO	2022/01/21 13:49:50 handleOrder start
+ERROR	2022/01/21 13:49:50 medicines.go:210: handleOrder s.ordersSvc.Save error: internal error
+
+INFO	2022/01/21 13:51:48 handleOrder start
+ERROR	2022/01/21 13:51:48 medicines.go:210: handleOrder s.ordersSvc.Save error: internal error
+
+INFO	2022/01/21 13:55:13 handleOrder start
+ERROR	2022/01/21 13:55:25 medicines.go:210: handleOrder s.medicinesSvc.Order error: internal error
+
+INFO	2022/01/21 13:55:33 handleOrder start
+
+INFO	2022/01/21 13:56:58 handleOrder start
+ERROR	2022/01/21 13:56:58 medicines.go:210: handleOrder s.medicinesSvc.Order error: internal error
+
+INFO	2022/01/21 13:57:12 handleOrder start
+
+INFO	2022/01/21 13:58:32 handleOrder start
+
+INFO	2022/01/21 13:58:44 handleGetOrders start
+ERROR	2022/01/21 13:58:44 medicines.go:291: handleSaveMedicine middleware.Authentication error: no authentication
+
+INFO	2022/01/21 14:00:25 handleGetOrders start
+
+INFO	2022/01/21 14:00:29 handleGetOrderByID start
+
+INFO	2022/01/21 14:00:41 handleSetOrderStatus start
+
+INFO	2022/01/21 14:00:53 handleGetOrders start
+
+INFO	2022/01/21 14:01:34 handleGetMedicines start
+ERROR	2022/01/21 14:01:34 medicines.go:159: handleGetMedicines s.medicinesSvc.GetSomeMedicines error: internal error
+
+INFO	2022/01/21 14:01:50 handleGetMedicines start
+ERROR	2022/01/21 14:01:50 medicines.go:159: handleGetMedicines s.medicinesSvc.GetSomeMedicines error: internal error

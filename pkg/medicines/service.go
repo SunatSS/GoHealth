@@ -89,3 +89,102 @@ func (s *Service) Save(ctx context.Context, item *types.Medicine) (*types.Medici
 	}
 	return item, http.StatusOK, nil
 }
+
+// Order
+func (s *Service) Order(ctx context.Context, item *types.Order) (*types.Order, int, error) {
+	if item.ID == 0 {
+		err := s.pool.QueryRow(ctx, `
+			INSERT INTO orders (customer_id, medicine_id, pharmacy_name, qty, price)
+			VALUES ($1, $2, $3, $4, $5) RETURNING id
+		`, &item.CustomerID, &item.MedicineID, &item.PharmacyName, &item.Qty, &item.Price).Scan(&item.ID)
+		if err != nil {
+			log.Println("Medicines s.pool.QueryRow ERROR:", err)
+			return nil, http.StatusInternalServerError, ErrInternal
+		}
+		return item, http.StatusOK, nil
+	}
+
+	_, err := s.pool.Exec(ctx, `
+		UPDATE orders SET customer_id = $1, medicine_id = $2, pharmacy_name = $3, qty = $4, price = $5 WHERE id = $6
+	`, &item.CustomerID, &item.MedicineID, &item.PharmacyName, &item.Qty, &item.Created, &item.ID)
+	if err != nil {
+		log.Println("Medicines s.pool.Exec ERROR:", err)
+		return nil, http.StatusInternalServerError, ErrInternal
+	}
+	return item, http.StatusOK, nil
+}
+
+// GetOrderByID
+func (s *Service) GetOrderByID(ctx context.Context, id int64) (*types.Order, int, error) {
+	item := &types.Order{}
+	err := s.pool.QueryRow(ctx, `
+		SELECT id, customer_id, medicine_id, pharmacy_name, qty, price, status FROM orders WHERE id = $1
+	`, id).Scan(&item.ID, &item.CustomerID, &item.MedicineID, &item.PharmacyName, &item.Qty, &item.Price, &item.Status)
+	if err == pgx.ErrNoRows {
+		log.Println("Medicines s.pool.QueryRow No rows:", err)
+		return nil, http.StatusNotFound, ErrNotFound
+	}
+	if err != nil {
+		log.Println("Medicines s.pool.QueryRow ERROR:", err)
+		return nil, http.StatusInternalServerError, ErrInternal
+	}
+
+	return item, http.StatusOK, nil
+}
+
+// GelAllOrders
+func (s *Service) GetAllOrders(ctx context.Context) ([]*types.Order, int, error) {
+	var items []*types.Order
+	sql := `
+		SELECT id, customer_id, medicine_id, pharmacy_name, qty, price, status, created FROM orders
+	`
+	rows, err := s.pool.Query(ctx, sql)
+	if err == pgx.ErrNoRows {
+		log.Println("Medicines s.pool.Query No rows:", err)
+		return nil, http.StatusNotFound, ErrNotFound
+	}
+	if err != nil {
+		log.Println("Medicines s.pool.Query ERROR:", err)
+		return nil, http.StatusInternalServerError, ErrInternal
+	}
+	defer rows.Close()
+	for rows.Next() {
+		item := &types.Order{}
+		err := rows.Scan(&item.ID, &item.CustomerID, &item.MedicineID, &item.PharmacyName, &item.Qty, &item.Price, &item.Status, &item.Created)
+		if err != nil {
+			log.Println("Medicines rows.Scan ERROR:", err)
+			return nil, http.StatusInternalServerError, ErrInternal
+		}
+		items = append(items, item)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Println("Medicines rows.Err ERROR:", err)
+		return nil, http.StatusInternalServerError, ErrInternal
+	}
+
+	return items, http.StatusOK, nil
+}
+
+// SetOrderStatus order status
+func (s *Service) SetOrderStatus(ctx context.Context, id int64, status string) (int, error) {
+	if status == "confirmed" {
+		_, err := s.pool.Exec(ctx, `
+			UPDATE medicines SET qty = qty - $1 WHERE id = $2
+		`, &id, &id)
+		if err != nil {
+			log.Println("Medicines s.pool.Exec ERROR:", err)
+			return http.StatusInternalServerError, ErrInternal
+		}
+	}
+
+	_, err := s.pool.Exec(ctx, `
+		UPDATE orders SET status = $2 WHERE id = $1
+	`, &id, &status)
+	if err != nil {
+		log.Println("Medicines s.pool.Exec ERROR:", err)
+		return http.StatusInternalServerError, ErrInternal
+	}
+
+	return http.StatusOK, nil
+}
